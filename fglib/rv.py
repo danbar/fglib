@@ -192,12 +192,8 @@ class Gaussian(object):
 
     def __eq__(self, other):
         """Compare two Gaussian random variables and return the result."""
-        d = 3  # Number of decimal places to round to.
-
-        return np.array_equal(np.around(self.mean, decimals=d),
-                              np.around(other.mean, decimals=d)) \
-           and np.array_equal(np.around(self.cov, decimals=d),
-                              np.around(other.cov, decimals=d))
+        return np.allclose(self.mean, other.mean) \
+            and np.allclose(self.cov, other.cov)
 
     def argmax(self, var):
         """Return the index of the maximum in dimension of variable."""
