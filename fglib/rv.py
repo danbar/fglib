@@ -134,11 +134,12 @@ class Gaussian(object):
         """
         self.W = np.linalg.inv(np.asarray(cov))
         self.Wm = np.dot(self.W, np.asarray(mean))
+        self.ndim = self.W.shape[0]
 
     @classmethod
-    def moment_form(cls, mean, cov):
+    def moment_form(cls, m, V):
         """Return a Gaussian random variable from a given moment form."""
-        return Gaussian(mean, cov)
+        return Gaussian(m, V)
 
     @classmethod
     def information_form(cls, W, Wm):
@@ -146,6 +147,7 @@ class Gaussian(object):
         self = Gaussian()
         self.W = np.asarray(W)
         self.Wm = np.asarray(Wm)
+        self.ndim = self.W.shape[0]
         return self
 
     @property
@@ -179,38 +181,42 @@ class Gaussian(object):
         return Gaussian.information_form(W, Wm)
 
     def __iadd__(self, other):
-        """Method for augmented addition and return the result."""
+        """Perform augmented addition and return the result."""
         return self.__add__(other)
 
     def __isub__(self, other):
-        """Method for augmented subtraction and return the result."""
+        """Perform augmented subtraction and return the result."""
         return self.__sub__(other)
 
     def __imul__(self, other):
-        """Method for augmented multiplication and return the result."""
+        """Perform augmented multiplication and return the result."""
         return self.__mul__(other)
 
     def __eq__(self, other):
-        """Compare two Gaussian random variables and return the result."""
-        return np.allclose(self.mean, other.mean) \
-            and np.allclose(self.cov, other.cov)
+        """Perform comparison and return the boolean result."""
+        return np.allclose(self.W, other.W) \
+            and np.allclose(self.Wm, other.Wm)
 
-    def argmax(self, var):
-        """Return the index of the maximum in dimension of variable."""
-        #TODO: ...
-        raise NotImplementedError
+    def argmax(self, dim=None):
+        """Return the argument of the maximum for a given dimension."""
+        if dim is None:
+            return self.mean
+        return self.mean[np.ix_(dim, [0])]
 
-    def int(self, var):
-        """Perform summation of specific dimension and return the result."""
-        #TODO: ...
-        raise NotImplementedError
+    def max(self, dim=None):
+        """Return the maximum for a given dimension."""
+        if dim is None:
+            return np.power(2 * np.pi, self.ndim / 2) * \
+                np.sqrt(np.linalg.det(self.cov))
+        g = self.int(dim)
+        return np.power(2 * np.pi, g.ndim / 2) * np.sqrt(np.linalg.det(g.cov))
+
+    def int(self, dim):
+        """Return the marginal for a given dimension."""
+        return Gaussian(self.mean[np.ix_(dim, [0])],
+                        self.cov[np.ix_(dim, dim)])
 
     def log(self):
         """Return the natural logarithm of the random variable."""
-        #TODO: ...
-        raise NotImplementedError
-
-    def max(self, var):
-        """Perform maximization of specific dimension and return the result."""
-        #TODO: ...
+        # TODO: Not implemented for Gaussian random variable.
         raise NotImplementedError
