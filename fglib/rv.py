@@ -151,14 +151,24 @@ class Gaussian(object):
         return self
 
     @property
-    def mean(self):
+    def m(self):
         """Return the mean."""
         return np.dot(np.linalg.inv(self.W), self.Wm)
 
     @property
-    def cov(self):
+    def V(self):
         """Return the covariance matrix."""
         return np.linalg.inv(self.W)
+
+    @property
+    def mean(self):
+        """Return the mean."""
+        return self.m
+
+    @property
+    def cov(self):
+        """Return the covariance matrix."""
+        return self.V
 
     def __str__(self):
         """Return string representation."""
