@@ -1,6 +1,6 @@
 """Module for random variables.
 
-This module contains classes for different random variables.
+This module contains classes for random variables.
 
 Classes:
 Discrete -- Discrete random variable
@@ -11,97 +11,106 @@ Gaussian -- Gaussian random variable
 import numpy as np
 
 
+class ParameterException(Exception):
+    pass
+
+
 class Discrete(object):
 
     """Discrete random variable.
 
-    The discrete random variable is interally implemented in ...
+    Discrete random variables are internally implemented using
+    multidimensional arrays for storing the probability mass function.
 
     """
 
-    index = None  # Static index variable
-    state = None  # Static state variable
-
-    def __init__(self, value, index):
+    def __init__(self, pmf, dim):
         """Discrete random variable.
 
-        Global variables 'index', 'state' have to be defined prior.
-        Value is an array with probabilities and
-        index a dictionary of variable node to index pairs.
+        Create a discrete random variable with corresponding
+        probability mass function.
+
+        Positional arguments:
+        pmf -- probability mass function
+        dim -- dimensions
 
         """
-        assert Discrete.index is not None
-        assert Discrete.state is not None
-        self.value = value
-        self.index = index
-
-        self.vars = list(index.keys())  # Variables
-        self.dims = list(index.values())  # Dimensions (list of indices)
+        self.pmf = np.asarray(pmf)  # Probability Mass Function
+        if not np.allclose(np.sum(self.pmf), 1):
+            raise ParameterException('PMF has to sum to 1.')
+        self.dim = dim  # Dimensions
+        self.ndim = len(self.dim)  # Number of dimensions
+        self.nsample = self.pmf.size / self.pmf.ndim  # Number of samples
 
     def __str__(self):
         """Return string representation."""
-        return str(self.value)
+        return str(self.pmf)
 
     def __add__(self, other):
-        """Perform addition and return the result."""
-        (x, y) = Discrete.__expand(self, other)
-        return Discrete(x + y, self.index)
+        """Add other to self and return the result."""
+        pmf = np.convolve(self.pmf, other.pmf, 'same')
+        return Discrete(pmf, self.dim)
+
+    def __sub__(self, other):
+        """Subtract other from self and return the result."""
+        pmf = np.convolve(self.pmf[::-1], other.pmf, 'same')
+        return Discrete(pmf, self.dim)
 
     def __mul__(self, other):
-        """Perform multiplication and return the result."""
-        (x, y) = Discrete.__expand(self, other)
-        return Discrete(x * y, self.index)
-
-    @staticmethod
-    def __expand(a, b):
-        """Adjust dimensions of to discrete random variables and return it.
-
-        TODO: ...
-
-        """
-        x = a.value
-        y = b.value
-
-        # Case: x = vector, y = matrix
-        if x.ndim < y.ndim:
-            i = b.index[a.vars[0]]  # Vector dimension in matrix coordinates
-
-            for d in sorted(b.dims):  # lowest dimension to highest dimension
-                if d < i:
-                    x = np.repeat(x[np.newaxis, :], len(Discrete.state),
-                                  axis=0)  # Prepend dimension
-                elif d > i:
-                    x = np.repeat(x[:, np.newaxis], len(Discrete.state),
-                                  axis=1)  # Append dimension
-
-        # Case: x = matrix, y = vector
-        elif x.ndim > y.ndim:
-            i = a.index[b.vars[0]]
-
-            for d in sorted(a.dims):
-                if d < i:
-                    y = np.repeat(y[np.newaxis, :], len(Discrete.state),
-                                  axis=0)
-                elif d > i:
-                    y = np.repeat(y[:, np.newaxis], len(Discrete.state),
-                                  axis=1)
-
-        return x, y  # Return discrete random variables with equal dimensions
+        """Multiply other with self and return the result."""
+        if self.ndim < other.ndim:
+            pmf = self._expand(other.dim) * other.pmf
+            return Discrete(pmf / np.sum(pmf), other.dim)
+        pmf = self.pmf * other._expand(self.dim)
+        return Discrete(pmf / np.sum(pmf), self.dim)
 
     def __iadd__(self, other):
-        """Method for augmented addition and return the result."""
+        """Method for augmented addition."""
         return self.__add__(other)
 
+    def __isub__(self, other):
+        """Method for augmented subtraction."""
+        return self.__sub__(other)
+
     def __imul__(self, other):
-        """Method for augmented multiplication and return the result."""
+        """Method for augmented multiplication."""
         return self.__mul__(other)
 
+    def __eq__(self, other):
+        """Compare self with other and return the boolean result."""
+        return np.allclose(self.dim, other.dim) \
+            and np.allclose(self.pmf, other.pmf)
+
+    def _expand(self, new_dim):
+        """Expand dimensions.
+
+        Expand the discrete random variable with the given new dimension
+        and return the new discrete random variable.
+
+        Positional arguments:
+        new_dim -- new dimension
+
+        """
+        pmf = self.pmf
+        for d in np.setdiff1d(new_dim, self.dim):
+            if d < self.dim[0]:
+                pmf = np.repeat(pmf[np.newaxis, :], self.nsample, axis=0)
+            elif d > self.dim[0]:
+                pmf = np.repeat(pmf[:, np.newaxis], self.nsample, axis=1)
+        return pmf
+
     def argmax(self, var):
-        """Return the index of the maximum in dimension of variable."""
+        """Return the argument of the maximum for a given dimension."""
         return np.argmax(self.value, self.index[var])
 
+    def max(self, var):
+        """Return the maximum for a given dimension."""
+        val = np.amax(self.value, self.index[var])
+        return Discrete(val, \
+                        {k: v for k, v in self.index.items() if k is not var})
+
     def int(self, var):
-        """Perform summation of specific dimension and return the result."""
+        """Return the marginal for a given dimension."""
         val = np.sum(self.value, self.index[var])
         return Discrete(val, \
                         {k: v for k, v in self.index.items() if k is not var})
@@ -110,18 +119,13 @@ class Discrete(object):
         """Return the natural logarithm of the random variable."""
         return Discrete(np.log(self.value), self.index)
 
-    def max(self, var):
-        """Perform maximization of specific dimension and return the result."""
-        val = np.amax(self.value, self.index[var])
-        return Discrete(val, \
-                        {k: v for k, v in self.index.items() if k is not var})
-
 
 class Gaussian(object):
 
     """Gaussian random variable.
 
-    The Gaussian random variable is internally implemented in information form.
+    Gaussian random variable are internally implemented using
+    the information form for storing the probability density function.
 
     """
 
@@ -131,10 +135,14 @@ class Gaussian(object):
         Create a Gaussian random variable with corresponding
         mean and covariance matrix.
 
+        Keyword arguments:
+        mean -- mean vector
+        cov -- covariance matrix
+
         """
-        self.W = np.linalg.inv(np.asarray(cov))
-        self.Wm = np.dot(self.W, np.asarray(mean))
-        self.ndim = self.W.shape[0]
+        self.W = np.linalg.inv(np.asarray(cov))  # Precision matrix
+        self.Wm = np.dot(self.W, np.asarray(mean))  # Precision-mean vector
+        self.ndim = self.W.shape[0]  # Number of dimensions
 
     @classmethod
     def moment_form(cls, m, V):
@@ -152,7 +160,7 @@ class Gaussian(object):
 
     @property
     def m(self):
-        """Return the mean."""
+        """Return the mean vector."""
         return np.dot(np.linalg.inv(self.W), self.Wm)
 
     @property
@@ -162,7 +170,7 @@ class Gaussian(object):
 
     @property
     def mean(self):
-        """Return the mean."""
+        """Return the mean vector."""
         return self.m
 
     @property
@@ -175,35 +183,35 @@ class Gaussian(object):
         return "%s %s" % (self.mean, self.cov)
 
     def __add__(self, other):
-        """Perform addition and return the result."""
+        """Add other to self and return the result."""
         return Gaussian(self.mean + other.mean,
                         self.cov + other.cov)
 
     def __sub__(self, other):
-        """Perform subtraction and return the result."""
+        """Subtract other from self and return the result."""
         return Gaussian(self.mean - other.mean,
                         self.cov - other.cov)
 
     def __mul__(self, other):
-        """Perform multiplication and return the result."""
+        """Multiply other with self and return the result."""
         W = self.W + other.W
         Wm = self.Wm + other.Wm
         return Gaussian.information_form(W, Wm)
 
     def __iadd__(self, other):
-        """Perform augmented addition and return the result."""
+        """Method for augmented addition."""
         return self.__add__(other)
 
     def __isub__(self, other):
-        """Perform augmented subtraction and return the result."""
+        """Method for augmented subtraction."""
         return self.__sub__(other)
 
     def __imul__(self, other):
-        """Perform augmented multiplication and return the result."""
+        """Method for augmented multiplication."""
         return self.__mul__(other)
 
     def __eq__(self, other):
-        """Perform comparison and return the boolean result."""
+        """Compare self with other and return the boolean result."""
         return np.allclose(self.W, other.W) \
             and np.allclose(self.Wm, other.Wm)
 
