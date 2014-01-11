@@ -30,7 +30,7 @@ class Node(object):
         """Return string representation."""
         return self.label
 
-    def neighbors(self, graph, node, exclusion):
+    def neighbors(self, graph, node, exclusion=None):
         """Get all neighbors with a given exclusion.
 
         Return iterator over all neighboring nodes
@@ -43,13 +43,16 @@ class Node(object):
 
         """
 
-        # Build iterator set
-        iterator = (exclusion,) \
-            if not isinstance(exclusion, list) else exclusion
+        if exclusion is None:
+            return nx.all_neighbors(graph, node)
+        else:
+            # Build iterator set
+            iterator = (exclusion,) \
+                if not isinstance(exclusion, list) else exclusion
 
-        # Return neighbors excluding iterator set
-        return iter([n for n in nx.all_neighbors(graph, node)
-                     if n not in iterator])
+            # Return neighbors excluding iterator set
+            return (n for n in nx.all_neighbors(graph, node)
+                    if n not in iterator)
 
 
 class VNode(Node):
