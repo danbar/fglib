@@ -12,6 +12,9 @@ import numpy as np
 
 
 class ParameterException(Exception):
+
+    """Exception for invalid parameters."""
+
     pass
 
 
@@ -99,21 +102,25 @@ class Discrete(object):
                 pmf = np.repeat(pmf[:, np.newaxis], self.nsample, axis=1)
         return pmf
 
-    def argmax(self, var):
+    def argmax(self, dim=None):
         """Return the argument of the maximum for a given dimension."""
-        return np.argmax(self.value, self.index[var])
+        if dim is None:
+            return np.unravel_index(self.pmf.argmax(), self.pmf.shape)
+        d = self.marginal(dim)
+        return np.argmax(d)
 
-    def max(self, var):
+    def max(self, dim=None):
         """Return the maximum for a given dimension."""
-        val = np.amax(self.value, self.index[var])
-        return Discrete(val, \
-                        {k: v for k, v in self.index.items() if k is not var})
+        if dim is None:
+            return np.amax(self.pmf)
+        m = self.marginal(dim)
+        return np.amax(m.pmf)
 
-    def int(self, var):
+    def marginal(self, dim):
         """Return the marginal for a given dimension."""
-        val = np.sum(self.value, self.index[var])
-        return Discrete(val, \
-                        {k: v for k, v in self.index.items() if k is not var})
+        pmf = np.sum(self.pmf, tuple(d for d in self.dim if d not in dim))
+        pmf /= np.sum(pmf)
+        return Discrete(pmf, dim)
 
     def log(self):
         """Return the natural logarithm of the random variable."""
@@ -226,10 +233,10 @@ class Gaussian(object):
         if dim is None:
             return np.power(2 * np.pi, self.ndim / 2) * \
                 np.sqrt(np.linalg.det(self.cov))
-        g = self.int(dim)
-        return np.power(2 * np.pi, g.ndim / 2) * np.sqrt(np.linalg.det(g.cov))
+        m = self.marginal(dim)
+        return np.power(2 * np.pi, m.ndim / 2) * np.sqrt(np.linalg.det(m.cov))
 
-    def int(self, dim):
+    def marginal(self, dim):
         """Return the marginal for a given dimension."""
         return Gaussian(self.mean[np.ix_(dim, [0])],
                         self.cov[np.ix_(dim, dim)])
