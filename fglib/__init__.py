@@ -4,10 +4,13 @@ Python package for factor graphs built upon NetworkX.
 
 Modules:
 inference -- Inference algorithms
-model -- Model for factor graphs
-object -- Objects of factor graphs
+graphs -- Factor graphs
+nodes -- Nodes for factor graphs
+edges -- Edges for factor graphs
 rv -- Random variables
 utils -- Utilities
 
 """
-__all__ = ["inference", "model", "object", "rv", "utils"]
+
+__all__ = ["inference", "graphs", "nodes", "edges", "rv", "utils"]
+__version__ = "0.1"

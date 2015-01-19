@@ -1,6 +1,6 @@
-"""Module for factor graph objects.
+"""Module for factor graph nodes.
 
-This module contains node classes and edge classes,
+This module contains node classes,
 which are used to build factor graphs.
 
 Classes:
@@ -9,50 +9,84 @@ VNode -- Variable node
 IOVNode -- Input-output variable node
 FNode -- Factor node
 IOFNode -- Input-output factor node
-Edge -- Edge
 
 """
 
-import types
+from abc import ABCMeta, abstractmethod, abstractproperty
+from enum import Enum
+from types import MethodType
 
 import networkx as nx
 
 
-class Node(object):
+class NodeType(Enum):
+
+    variable_node = 1
+    factor_node = 2
+
+
+class Node(metaclass=ABCMeta):
 
     """Abstract base class for all nodes."""
 
-    def __init__(self, label):
+    def __init__(self, label, graph=None):
         """Create a node with an associated label."""
-        self.label = str(label)
+        self.__label = str(label)
+        self.graph = graph
 
     def __str__(self):
         """Return string representation."""
-        return self.label
+        return self.__label
 
-    def neighbors(self, graph, node, exclusion=None):
+    @abstractproperty
+    def type(self):
+        pass
+
+    @property
+    def graph(self):
+        return self.__graph
+
+    @graph.setter
+    def graph(self, graph):
+        self.__graph = graph
+
+    def neighbors(self, exclusion=None):
         """Get all neighbors with a given exclusion.
 
         Return iterator over all neighboring nodes
         without the given exclusion node.
 
         Positional arguments:
-        graph -- the factor graph containing the node
-        node -- the node
         exclusion -- the exclusion node
 
         """
 
         if exclusion is None:
-            return nx.all_neighbors(graph, node)
+            return nx.all_neighbors(self.graph, self)
         else:
             # Build iterator set
             iterator = (exclusion,) \
                 if not isinstance(exclusion, list) else exclusion
 
             # Return neighbors excluding iterator set
-            return (n for n in nx.all_neighbors(graph, node)
+            return (n for n in nx.all_neighbors(self.graph, self)
                     if n not in iterator)
+
+    @abstractmethod
+    def spa(self, tnode):
+        pass
+
+    @abstractmethod
+    def mpa(self, tnode):
+        pass
+
+    @abstractmethod
+    def msa(self, tnode):
+        pass
+
+    @abstractmethod
+    def mf(self, tnode):
+        pass
 
 
 class VNode(Node):
@@ -64,28 +98,52 @@ class VNode(Node):
 
     """
 
-    def __init__(self, label, init=None, observed=False):
+    def __init__(self, label, graph=None, init=None, observed=False):
         """Create a variable node."""
-        Node.__init__(self, label)
-        self.TYPE = "vn"
+        super().__init__(label, graph)
         self.init = init
         self.observed = observed
 
-    def belief(self, graph):
+    @property
+    def type(self):
+        return NodeType.variable_node
+
+    def belief(self):
         """Return belief of the variable node."""
-        iterator = graph.neighbors_iter(self)
+        iterator = self.graph.neighbors_iter(self)
 
         # Pick first node
         n = next(iterator)
 
         # Product over all incoming messages
-        belief = graph[n][self]['object'].get_message(n, self)
+        belief = self.graph[n][self]['object'].get_message(n, self)
         for n in iterator:
-            belief *= graph[n][self]['object'].get_message(n, self)
+            belief *= self.graph[n][self]['object'].get_message(n, self)
 
         return belief
 
-    def spa(self, graph, tnode):
+    def marginal(self, norm=True):
+        """Return the marginal distribution of the variable node."""
+        b = self.belief(self.graph)
+
+        if norm:  # return normalized marginal
+            if self.graph.norm_const is None:  # compute normalization constant
+                self.graph.norm_const = 1 / sum(b.value)
+            return self.graph.norm_const * b.value
+        return b
+
+    def maximum(self):
+        """Return the maximum probability of the variable node."""
+        b = self.belief(self.graph)
+        return b.max(self)
+
+    def argmax(self):
+        """Return the argument for maximum probability of the variable node."""
+        # In case of multiple occurrences of the maximum values,
+        # the indices corresponding to the first occurrence are returned.
+        return self.belief(self.graph).argmax(self)
+
+    def spa(self, tnode):
         """Return message of the sum-product algorithm."""
         if self.observed:
             return self.init
@@ -94,16 +152,16 @@ class VNode(Node):
             msg = self.init
 
             # Product over incoming messages
-            for n in self.neighbors(graph, self, tnode):
-                msg *= graph[n][self]['object'].get_message(n, self)
+            for n in self.neighbors(self.graph, self, tnode):
+                msg *= self.graph[n][self]['object'].get_message(n, self)
 
             return msg
 
-    def mpa(self, graph, tnode):
+    def mpa(self, tnode):
         """Return message of the max-product algorithm."""
-        return self.spa(graph, tnode)
+        return self.spa(self.graph, tnode)
 
-    def msa(self, graph, tnode):
+    def msa(self, tnode):
         """Return message of the max-sum algorithm."""
         if self.observed:
             return self.init
@@ -113,38 +171,17 @@ class VNode(Node):
             msg = msg.log()
 
             # Sum over incoming messages
-            for n in self.neighbors(graph, self, tnode):
-                msg += graph[n][self]['object'].get_message(n, self)
+            for n in self.neighbors(self.graph, self, tnode):
+                msg += self.graph[n][self]['object'].get_message(n, self)
 
             return msg
 
-    def mf(self, graph, tnode):
+    def mf(self, tnode):
         """Return message of the mean-field algorithm."""
         if self.observed:
             return self.init
         else:
-            return self.belief(graph)
-
-    def marginal(self, graph, norm=True):
-        """Return the marginal distribution of the variable node."""
-        b = self.belief(graph)
-
-        if norm:  # return normalized marginal
-            if graph.norm_const is None:  # compute normalization constant
-                graph.norm_const = 1 / sum(b.value)
-            return graph.norm_const * b.value
-        return b
-
-    def maximum(self, graph):
-        """Return the maximum probability of the variable node."""
-        b = self.belief(graph)
-        return b.max(self)
-
-    def argmax(self, graph):
-        """Return the argument for maximum probability of the variable node."""
-        # In case of multiple occurrences of the maximum values,
-        # the indices corresponding to the first occurrence are returned.
-        return self.belief(graph).argmax(self)
+            return self.belief(self.graph)
 
 
 class IOVNode(VNode):
@@ -157,9 +194,9 @@ class IOVNode(VNode):
 
     """
 
-    def __init__(self, label, init=None, observed=False, callback=None):
+    def __init__(self, label, graph, init=None, observed=False, callback=None):
         """Create an input-output variable node."""
-        VNode.__init__(self, label, init, observed)
+        super().__init__(label, graph, init, observed)
         if callback is not None:
             self.set_callback(callback)
 
@@ -170,10 +207,10 @@ class IOVNode(VNode):
         the existing message passing methods.
 
         """
-        self.spa = types.MethodType(callback, self)
-        self.mpa = types.MethodType(callback, self)
-        self.msa = types.MethodType(callback, self)
-        self.mf = types.MethodType(callback, self)
+        self.spa = MethodType(callback, self)
+        self.mpa = MethodType(callback, self)
+        self.msa = MethodType(callback, self)
+        self.mf = MethodType(callback, self)
 
 
 class FNode(Node):
@@ -185,29 +222,32 @@ class FNode(Node):
 
     """
 
-    def __init__(self, label, factor):
+    def __init__(self, label, factor, graph=None):
         """Create a factor node."""
-        Node.__init__(self, label)
-        self.TYPE = "fn"
+        super().__init__(label, graph)
         self.factor = factor
         self.record = {}
 
-    def spa(self, graph, tnode):
+    @property
+    def type(self):
+        return NodeType.factor_node
+
+    def spa(self, tnode):
         """Return message of the sum-product algorithm."""
         # Initialize with local factor
         msg = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(graph, self, tnode):
-            msg *= graph[n][self]['object'].get_message(n, self)
+        for n in self.neighbors(self.graph, self, tnode):
+            msg *= self.graph[n][self]['object'].get_message(n, self)
 
         # Integration/Summation over incoming variables
-        for n in self.neighbors(graph, self, tnode):
+        for n in self.neighbors(self.graph, self, tnode):
             msg = msg.int(n)
 
         return msg
 
-    def mpa(self, graph, tnode):
+    def mpa(self, tnode):
         """Return message of the max-product algorithm."""
         self.record[tnode] = {}
 
@@ -215,17 +255,17 @@ class FNode(Node):
         msg = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(graph, self, tnode):
-            msg *= graph[n][self]['object'].get_message(n, self)
+        for n in self.neighbors(self.graph, self, tnode):
+            msg *= self.graph[n][self]['object'].get_message(n, self)
 
         # Maximization over incoming variables
-        for n in self.neighbors(graph, self, tnode):
+        for n in self.neighbors(self.graph, self, tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
             msg = msg.max(n)
 
         return msg
 
-    def msa(self, graph, tnode):
+    def msa(self, tnode):
         """Return message of the max-sum algorithm."""
         self.record[tnode] = {}
 
@@ -233,17 +273,17 @@ class FNode(Node):
         msg = self.factor.log()
 
         # Sum over incoming messages
-        for n in self.neighbors(graph, self, tnode):
-            msg += graph[n][self]['object'].get_message(n, self)
+        for n in self.neighbors(self.graph, self, tnode):
+            msg += self.graph[n][self]['object'].get_message(n, self)
 
         # Maximization over incoming variables
-        for n in self.neighbors(graph, self, tnode):
+        for n in self.neighbors(self.graph, self, tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
             msg = msg.max(n)
 
         return msg
 
-    def mf(self, graph, tnode):
+    def mf(self, tnode):
         """Return message of the mean-field algorithm."""
         # Initialize with local factor
         msg = self.factor
@@ -269,9 +309,9 @@ class IOFNode(FNode):
 
     """
 
-    def __init__(self, label, factor, callback=None):
+    def __init__(self, label, factor, graph=None, callback=None):
         """Create an input-output factor node."""
-        FNode.__init__(self, label, factor)
+        super().__init__(self, label, factor, graph)
         if callback is not None:
             self.set_callback(callback)
 
@@ -282,45 +322,7 @@ class IOFNode(FNode):
         the existing message passing methods.
 
         """
-        self.spa = types.MethodType(callback, self)
-        self.mpa = types.MethodType(callback, self)
-        self.msa = types.MethodType(callback, self)
-        self.mf = types.MethodType(callback, self)
-
-
-class Edge(object):
-
-    """Edge.
-
-    Base class for all edges.
-    Each edge class contains a message attribute,
-    which stores the corresponding message in forward and backward direction.
-
-    """
-
-    def __init__(self, snode, tnode, init=None):
-        """Create an edge."""
-        # Array Index
-        self.index = {snode: 0, tnode: 1}
-
-        # Two-dimensional message list
-        self.message = [[None, init], \
-                        [init, None]]
-
-        # Variable node
-        if snode.TYPE == "vn":
-            self.variable = snode
-        else:
-            self.variable = tnode
-
-    def __str__(self):
-        """Return string representation."""
-        return str(self.message)
-
-    def set_message(self, snode, tnode, value):
-        """Set value of message from source node to target node."""
-        self.message[self.index[snode]][self.index[tnode]] = value
-
-    def get_message(self, snode, tnode):
-        """Return value of message from source node to target node."""
-        return self.message[self.index[snode]][self.index[tnode]]
+        self.spa = MethodType(callback, self)
+        self.mpa = MethodType(callback, self)
+        self.msa = MethodType(callback, self)
+        self.mf = MethodType(callback, self)

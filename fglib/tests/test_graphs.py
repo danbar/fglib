@@ -1,6 +1,6 @@
 import unittest
 
-from .. import model
+from .. import graphs
 
 
 class TestFactorGraph(unittest.TestCase):

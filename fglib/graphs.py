@@ -1,4 +1,4 @@
-"""Module for actor graphs.
+"""Module for factor graphs.
 
 This module contains the base class for factor graphs
 with additional functions to convert arbitrary graphs to factor graphs.
@@ -13,7 +13,7 @@ convert_to_fg -- Convert to factor graph function
 
 import networkx as nx
 
-import fglib.object as obj
+from . import nodes, edges
 
 
 class FactorGraph(nx.Graph):
@@ -27,16 +27,17 @@ class FactorGraph(nx.Graph):
 
     def __init__(self):
         """Create a factor graph."""
-        nx.Graph.__init__(self, name="Factor Graph")
+        super().__init__(self, name="Factor Graph")
 
         # Normalization constant 1/Z
-        self.norm_const = None
+        self.norm_const = None       # Really useful?
 
     def set_node(self, node, **attr):
         """Place a node in the factor graph."""
-        FactorGraph.add_node(self, node, \
-                             attr, \
-                             type=node.TYPE)
+        node.graph = self
+        FactorGraph.add_node(self, node,
+                             attr,
+                             type=node.type)
 
     def set_nodes(self, nodes):
         """Place multiple nodes from list in the factor graph."""
@@ -45,8 +46,8 @@ class FactorGraph(nx.Graph):
 
     def set_edge(self, snode, tnode, init=None):
         """Place an edge in the factor graph."""
-        self.add_edge(snode, tnode, \
-                      object=obj.Edge(snode, tnode, init))
+        self.add_edge(snode, tnode,
+                      object=edges.Edge(snode, tnode, init))
 
     def set_edges(self, edges):
         """Place multiple edges from list in the factor graph."""
@@ -55,11 +56,13 @@ class FactorGraph(nx.Graph):
 
     def get_vnodes(self):
         """Return list of all variable nodes."""
-        return [n for (n, d) in self.nodes(data=True) if d['type'] == "vn"]
+        return [n for (n, d) in self.nodes(data=True)
+                if d['type'] == nodes.NodeType.variable_node]
 
     def get_fnodes(self):
         """Return list of all factor nodes."""
-        return [n for (n, d) in self.nodes(data=True) if d['type'] == "fn"]
+        return [n for (n, d) in self.nodes(data=True)
+                if d['type'] == nodes.NodeType.factor_node]
 
 
 def convert_to_fg(graph, vnode, fnode, bipartite=False):
