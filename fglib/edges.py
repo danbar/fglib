@@ -27,7 +27,7 @@ class Edge(object):
         self.index = {snode: 0, tnode: 1}
 
         # Two-dimensional message list
-        self.message = [[None, init], \
+        self.message = [[None, init],
                         [init, None]]
 
         # Variable node
