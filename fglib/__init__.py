@@ -12,5 +12,5 @@ utils -- Utilities
 
 """
 
-__all__ = ["inference", "graphs", "nodes", "edges", "rv", "utils"]
+__all__ = ["graphs", "inference", "nodes", "rv", "utils"]
 __version__ = "0.1"

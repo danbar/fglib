@@ -29,10 +29,10 @@ class Node(metaclass=ABCMeta):
 
     """Abstract base class for all nodes."""
 
-    def __init__(self, label, graph=None):
+    def __init__(self, label):
         """Create a node with an associated label."""
         self.__label = str(label)
-        self.graph = graph
+        self.__graph = None
 
     def __str__(self):
         """Return string representation."""
@@ -98,9 +98,9 @@ class VNode(Node):
 
     """
 
-    def __init__(self, label, graph=None, init=None, observed=False):
+    def __init__(self, label, init=1.0, observed=False):
         """Create a variable node."""
-        super().__init__(label, graph)
+        super().__init__(label)
         self.init = init
         self.observed = observed
 
@@ -152,7 +152,7 @@ class VNode(Node):
             msg = self.init
 
             # Product over incoming messages
-            for n in self.neighbors(self.graph, self, tnode):
+            for n in self.neighbors(tnode):
                 msg *= self.graph[n][self]['object'].get_message(n, self)
 
             return msg
@@ -194,9 +194,9 @@ class IOVNode(VNode):
 
     """
 
-    def __init__(self, label, graph, init=None, observed=False, callback=None):
+    def __init__(self, label, init=None, observed=False, callback=None):
         """Create an input-output variable node."""
-        super().__init__(label, graph, init, observed)
+        super().__init__(label, init, observed)
         if callback is not None:
             self.set_callback(callback)
 
@@ -222,9 +222,9 @@ class FNode(Node):
 
     """
 
-    def __init__(self, label, factor, graph=None):
+    def __init__(self, label, factor=None):
         """Create a factor node."""
-        super().__init__(label, graph)
+        super().__init__(label)
         self.factor = factor
         self.record = {}
 
@@ -232,17 +232,25 @@ class FNode(Node):
     def type(self):
         return NodeType.factor_node
 
+    @property
+    def factor(self):
+        return self.__factor
+
+    @factor.setter
+    def factor(self, factor):
+        self.__factor = factor
+
     def spa(self, tnode):
         """Return message of the sum-product algorithm."""
         # Initialize with local factor
         msg = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             msg *= self.graph[n][self]['object'].get_message(n, self)
 
         # Integration/Summation over incoming variables
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             msg = msg.int(n)
 
         return msg
@@ -309,9 +317,9 @@ class IOFNode(FNode):
 
     """
 
-    def __init__(self, label, factor, graph=None, callback=None):
+    def __init__(self, label, factor, callback=None):
         """Create an input-output factor node."""
-        super().__init__(self, label, factor, graph)
+        super().__init__(self, label, factor)
         if callback is not None:
             self.set_callback(callback)
 

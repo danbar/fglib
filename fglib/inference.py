@@ -17,7 +17,7 @@ from random import choice
 import networkx as nx
 
 
-def belief_propagation(model, query_node=None):
+def belief_propagation(graph, query_node=None):
     """Belief propagation.
 
     Perform exact inference on tree structured graphs.
@@ -26,10 +26,10 @@ def belief_propagation(model, query_node=None):
     """
 
     if query_node is None:  # pick random node
-        query_node = choice(model.nodes())
+        query_node = choice(graph.nodes())
 
     # Depth First Search to determine edges
-    dfs = nx.dfs_edges(model, query_node)
+    dfs = nx.dfs_edges(graph, query_node)
 
     # Convert tuple to reversed list
     backward_path = list(dfs)
@@ -37,19 +37,19 @@ def belief_propagation(model, query_node=None):
 
     # Messages in forward phase
     for (v, u) in forward_path:  # Edge direction: u -> v
-        msg = u.spa(model, v)
-        model[u][v]['object'].set_message(u, v, msg)
+        msg = u.spa(v)
+        graph[u][v]['object'].set_message(u, v, msg)
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
-        msg = u.spa(model, v)
-        model[u][v]['object'].set_message(u, v, msg)
+        msg = u.spa(graph, v)
+        graph[u][v]['object'].set_message(u, v, msg)
 
     # Return marginal distribution
-    return query_node.marginal(model)
+    return query_node.marginal(graph)
 
 
-def sum_product(model, query_node=None):
+def sum_product(graph, query_node=None):
     """Sum-product algorithm.
 
     Compute marginal distribution on graphs that are tree structured.
@@ -58,7 +58,7 @@ def sum_product(model, query_node=None):
     """
 
     # Sum-Product algorithm is equivalent to Belief Propagation
-    return belief_propagation(model, query_node)
+    return belief_propagation(graph, query_node)
 
 
 def max_product(model, query_node=None):

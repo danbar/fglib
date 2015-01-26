@@ -27,7 +27,7 @@ class Discrete(object):
 
     """
 
-    def __init__(self, pmf, dim):
+    def __init__(self, raw_pmf, *args):
         """Discrete random variable.
 
         Create a discrete random variable with corresponding
@@ -38,12 +38,19 @@ class Discrete(object):
         dim -- dimensions
 
         """
-        self.pmf = np.asarray(pmf)  # Probability Mass Function
-        if not np.allclose(np.sum(self.pmf), 1):
-            raise ParameterException('PMF has to sum to 1.')
-        self.dim = dim  # Dimensions
-        self.ndim = len(self.dim)  # Number of dimensions
-        self.nsample = self.pmf.size / self.pmf.ndim  # Number of samples
+        pmf = np.asarray(raw_pmf, dtype=np.float64)
+
+        # Set probability mass function
+        if not np.allclose(np.sum(pmf), 1):
+            raise ParameterException('Invalid probability mass function.')
+        else:
+            self.pmf = pmf
+
+        # Set variable nodes for dimensions
+        if np.size(pmf) != len(args):
+            raise ParameterException('Dimension mismatch.')
+        else:
+            self.dim = args
 
     def __str__(self):
         """Return string representation."""
@@ -61,11 +68,14 @@ class Discrete(object):
 
     def __mul__(self, other):
         """Multiply other with self and return the result."""
-        if self.ndim < other.ndim:
-            pmf = self._expand(other.dim) * other.pmf
-            return Discrete(pmf / np.sum(pmf), other.dim)
-        pmf = self.pmf * other._expand(self.dim)
-        return Discrete(pmf / np.sum(pmf), self.dim)
+        if len(self.dim) < len(other.dim):
+            self._expand(other.dim)
+        elif len(self.dim) > len(other.dim):
+            other._expand(self.dim)
+
+        pmf = self.pmf * other.pmf
+        pmf /= np.sum(pmf)
+        return Discrete(pmf, *self.dim)
 
     def __iadd__(self, other):
         """Method for augmented addition."""
@@ -81,33 +91,45 @@ class Discrete(object):
 
     def __eq__(self, other):
         """Compare self with other and return the boolean result."""
-        return np.allclose(self.dim, other.dim) \
-            and np.allclose(self.pmf, other.pmf)
+        return np.allclose(self.pmf, other.pmf) \
+            and self.dim == other.dim
 
-    def _expand(self, new_dim):
+    def _expand(self, dims):
         """Expand dimensions.
 
-        Expand the discrete random variable with the given new dimension
-        and return the new discrete random variable.
+        Expand the discrete random variable with the given new dimensions.
 
         Positional arguments:
-        new_dim -- new dimension
+        dims -- new dimensions
 
         """
-        pmf = self.pmf
-        for d in np.setdiff1d(new_dim, self.dim):
-            if d < self.dim[0]:
-                pmf = np.repeat(pmf[np.newaxis, :], self.nsample, axis=0)
-            elif d > self.dim[0]:
-                pmf = np.repeat(pmf[:, np.newaxis], self.nsample, axis=1)
-        return pmf
+        reps = [1, ] * len(dims)
+
+        # Extract missing dimensions
+        diff = [i for i, d in enumerate(dims) if d not in self.dim]
+
+        # Expand missing dimensions
+        for d in diff:
+            self.pmf = np.expand_dims(self.pmf, axis=d)
+            reps[d] = 2
+
+        # Repeat missing dimensions
+        self.pmf = np.tile(self.pmf, reps)
+        self.dim = dims
+
+    def marginal(self, *dims):
+        """Return the marginal for a given dimension."""
+        axis = tuple(idx for idx, d in enumerate(self.dim) if d not in dims)
+        pmf = np.sum(self.pmf, axis)
+        pmf /= np.sum(pmf)
+        return Discrete(pmf, dims)
 
     def argmax(self, dim=None):
         """Return the argument of the maximum for a given dimension."""
         if dim is None:
             return np.unravel_index(self.pmf.argmax(), self.pmf.shape)
-        d = self.marginal(dim)
-        return np.argmax(d)
+        m = self.marginal(dim)
+        return np.argmax(m.pmf)
 
     def max(self, dim=None):
         """Return the maximum for a given dimension."""
@@ -115,12 +137,6 @@ class Discrete(object):
             return np.amax(self.pmf)
         m = self.marginal(dim)
         return np.amax(m.pmf)
-
-    def marginal(self, dim):
-        """Return the marginal for a given dimension."""
-        pmf = np.sum(self.pmf, tuple(d for d in self.dim if d not in dim))
-        pmf /= np.sum(pmf)
-        return Discrete(pmf, dim)
 
     def log(self):
         """Return the natural logarithm of the random variable."""
