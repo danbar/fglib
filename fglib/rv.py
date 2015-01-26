@@ -47,7 +47,7 @@ class Discrete(object):
             self.pmf = pmf
 
         # Set variable nodes for dimensions
-        if np.size(pmf) != len(args):
+        if np.ndim(pmf) != len(args):
             raise ParameterException('Dimension mismatch.')
         else:
             self.dim = args
