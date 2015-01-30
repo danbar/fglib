@@ -17,6 +17,9 @@ from enum import Enum
 from types import MethodType
 
 import networkx as nx
+import numpy as np
+
+from . import rv
 
 
 class NodeType(Enum):
@@ -98,10 +101,13 @@ class VNode(Node):
 
     """
 
-    def __init__(self, label, init=1.0, observed=False):
+    def __init__(self, label, init=None, observed=False):
         """Create a variable node."""
         super().__init__(label)
-        self.init = init
+        if init is not None:
+            self.init = init
+        else:
+            self.init = rv.Discrete(np.array([0.5, 0.5]), self)
         self.observed = observed
 
     @property
@@ -251,7 +257,7 @@ class FNode(Node):
 
         # Integration/Summation over incoming variables
         for n in self.neighbors(tnode):
-            msg = msg.int(n)
+            msg = msg.marginal(n)
 
         return msg
 

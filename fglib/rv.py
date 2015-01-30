@@ -119,10 +119,12 @@ class Discrete(object):
 
     def marginal(self, *dims):
         """Return the marginal for a given dimension."""
-        axis = tuple(idx for idx, d in enumerate(self.dim) if d not in dims)
+        axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.sum(self.pmf, axis)
         pmf /= np.sum(pmf)
-        return Discrete(pmf, dims)
+
+        new_dims = tuple(d for d in self.dim if d not in dims)
+        return Discrete(pmf, *new_dims)
 
     def argmax(self, dim=None):
         """Return the argument of the maximum for a given dimension."""
