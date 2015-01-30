@@ -128,16 +128,6 @@ class VNode(Node):
 
         return belief
 
-    def marginal(self, norm=True):
-        """Return the marginal distribution of the variable node."""
-        b = self.belief(self.graph)
-
-        if norm:  # return normalized marginal
-            if self.graph.norm_const is None:  # compute normalization constant
-                self.graph.norm_const = 1 / sum(b.value)
-            return self.graph.norm_const * b.value
-        return b
-
     def maximum(self):
         """Return the maximum probability of the variable node."""
         b = self.belief(self.graph)

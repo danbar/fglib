@@ -42,11 +42,11 @@ def belief_propagation(graph, query_node=None):
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
-        msg = u.spa(graph, v)
+        msg = u.spa(v)
         graph[u][v]['object'].set_message(u, v, msg)
 
     # Return marginal distribution
-    return query_node.marginal(graph)
+    return query_node.belief()
 
 
 def sum_product(graph, query_node=None):
