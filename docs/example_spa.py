@@ -18,6 +18,13 @@ C. M. Bishop, Pattern Recognition and Machine Learning. Springer, 2006.
                            | x4 |
                             \--/
 
+The following joint distributions are used for the factor nodes.
+
+     fa   | x2=0 x2=1     fb   | x3=0 x3=1     fa   | x4=0 x4=1
+     ----------------     ----------------     ----------------
+     x1=0 | 0.3  0.4      x2=0 | 0.3  0.4      x2=0 | 0.3  0.4
+     x1=1 | 0.3  0.0      x2=1 | 0.3  0.0      x2=1 | 0.3  0.0
+
 """
 
 from fglib import graphs, nodes, inference, rv
