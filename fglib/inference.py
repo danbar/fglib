@@ -26,7 +26,7 @@ def belief_propagation(graph, query_node=None):
     """
 
     if query_node is None:  # pick random node
-        query_node = choice(graph.nodes())
+        query_node = choice(graph.get_vnodes())
 
     # Depth First Search to determine edges
     dfs = nx.dfs_edges(graph, query_node)
@@ -72,7 +72,7 @@ def max_product(model, query_node=None):
     track = {}  # Setting of variables
 
     if query_node is None:  # pick random node
-        query_node = choice(model.nodes())
+        query_node = choice(model.get_vnodes())
 
     # Depth First Search to determine edges
     dfs = nx.dfs_edges(model, query_node)
@@ -115,7 +115,7 @@ def max_sum(model, query_node=None):
     track = {}  # Setting of variables
 
     if query_node is None:  # pick random node
-        query_node = choice(model.nodes())
+        query_node = choice(model.get_vnodes())
 
     # Depth First Search to determine edges
     dfs = nx.dfs_edges(model, query_node)
