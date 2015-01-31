@@ -1,4 +1,4 @@
-![logo of fglib](docs/logo.svg?raw=true)
+![logo of fglib](https://rawgithub.com/danbar/fglib/blob/master/docs/logo.svg)
 
 fglib
 =====
