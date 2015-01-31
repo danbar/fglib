@@ -1,3 +1,5 @@
+![logo of fglib](https://rawgit.com/danbar/fglib/master/docs/logo.svg)
+
 fglib
 =====
 
