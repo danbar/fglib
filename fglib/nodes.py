@@ -130,14 +130,15 @@ class VNode(Node):
 
     def maximum(self):
         """Return the maximum probability of the variable node."""
-        b = self.belief(self.graph)
-        return b.max(self)
+        b = self.belief()
+        return np.amax(b.pmf)
 
     def argmax(self):
         """Return the argument for maximum probability of the variable node."""
         # In case of multiple occurrences of the maximum values,
         # the indices corresponding to the first occurrence are returned.
-        return self.belief(self.graph).argmax(self)
+        b = self.belief()
+        return b.argmax(self)
 
     def spa(self, tnode):
         """Return message of the sum-product algorithm."""
@@ -155,7 +156,7 @@ class VNode(Node):
 
     def mpa(self, tnode):
         """Return message of the max-product algorithm."""
-        return self.spa(self.graph, tnode)
+        return self.spa(tnode)
 
     def msa(self, tnode):
         """Return message of the max-sum algorithm."""
@@ -259,11 +260,11 @@ class FNode(Node):
         msg = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             msg *= self.graph[n][self]['object'].get_message(n, self)
 
         # Maximization over incoming variables
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
             msg = msg.max(n)
 

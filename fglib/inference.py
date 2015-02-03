@@ -16,6 +16,8 @@ from random import choice
 
 import networkx as nx
 
+from . import nodes
+
 
 def belief_propagation(graph, query_node=None):
     """Belief propagation.
@@ -61,7 +63,7 @@ def sum_product(graph, query_node=None):
     return belief_propagation(graph, query_node)
 
 
-def max_product(model, query_node=None):
+def max_product(graph, query_node=None):
     """Max-product algorithm.
 
     Compute setting of variables with maximum probability on graphs
@@ -72,10 +74,10 @@ def max_product(model, query_node=None):
     track = {}  # Setting of variables
 
     if query_node is None:  # pick random node
-        query_node = choice(model.get_vnodes())
+        query_node = choice(graph.get_vnodes())
 
     # Depth First Search to determine edges
-    dfs = nx.dfs_edges(model, query_node)
+    dfs = nx.dfs_edges(graph, query_node)
 
     # Convert tuple to reversed list
     backward_path = list(dfs)
@@ -83,25 +85,25 @@ def max_product(model, query_node=None):
 
     # Messages in forward phase
     for (v, u) in forward_path:  # Edge direction: u -> v
-        msg = u.mpa(model, v)
-        model[u][v]['object'].set_message(u, v, msg)
+        msg = u.mpa(v)
+        graph[u][v]['object'].set_message(u, v, msg)
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
-        msg = u.mpa(model, v)
-        model[u][v]['object'].set_message(u, v, msg)
+        msg = u.mpa(v)
+        graph[u][v]['object'].set_message(u, v, msg)
 
     # Maximum argument for query node
-    track[query_node] = query_node.argmax(model)
+    track[query_node] = query_node.argmax()
 
     # Back-tracking
     for (u, v) in backward_path:  # Edge direction: u -> v
-        if v.TYPE == "fn":
+        if v.type == nodes.NodeType.factor_node:
             for k in v.record[u].keys():  # Iterate over outgoing edges
-                track[k] = v.record[u][k][track[u]]
+                track[k] = v.record[u][k]
 
     # Return maximum probability for query node and setting of variable
-    return query_node.maximum(model), track
+    return query_node.maximum(), track
 
 
 def max_sum(model, query_node=None):

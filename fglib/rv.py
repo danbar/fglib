@@ -126,6 +126,15 @@ class Discrete(object):
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)
 
+    def max(self, *dims):
+        """Return the maximum for a given dimension."""
+        axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
+        pmf = np.amax(self.pmf, axis)
+        pmf /= np.sum(pmf)
+
+        new_dims = tuple(d for d in self.dim if d not in dims)
+        return Discrete(pmf, *new_dims)
+
     def argmax(self, dim=None):
         """Return the argument of the maximum for a given dimension."""
         if dim is None:
@@ -133,16 +142,9 @@ class Discrete(object):
         m = self.marginal(dim)
         return np.argmax(m.pmf)
 
-    def max(self, dim=None):
-        """Return the maximum for a given dimension."""
-        if dim is None:
-            return np.amax(self.pmf)
-        m = self.marginal(dim)
-        return np.amax(m.pmf)
-
     def log(self):
         """Return the natural logarithm of the random variable."""
-        return Discrete(np.log(self.value), self.index)
+        return Discrete(np.log(self.value), self.dim)
 
 
 class Gaussian(object):
