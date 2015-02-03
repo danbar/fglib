@@ -117,7 +117,7 @@ class Discrete(object):
         self.pmf = np.tile(self.pmf, reps)
         self.dim = dims
 
-    def marginal(self, *dims):
+    def marginalize(self, *dims):
         """Return the marginal for a given dimension."""
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.sum(self.pmf, axis)
@@ -126,7 +126,7 @@ class Discrete(object):
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)
 
-    def max(self, *dims):
+    def maximize(self, *dims):
         """Return the maximum for a given dimension."""
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.amax(self.pmf, axis)
@@ -139,7 +139,7 @@ class Discrete(object):
         """Return the argument of the maximum for a given dimension."""
         if dim is None:
             return np.unravel_index(self.pmf.argmax(), self.pmf.shape)
-        m = self.marginal(dim)
+        m = self.marginalize(dim)
         return np.argmax(m.pmf)
 
     def log(self):
@@ -253,11 +253,11 @@ class Gaussian(object):
         if dim is None:
             return np.power(2 * np.pi, self.ndim / 2) * \
                 np.sqrt(np.linalg.det(self.cov))
-        m = self.marginal(dim)
+        m = self.marginalize(dim)
         return np.power(2 * np.pi, m.ndim / 2) * np.sqrt(np.linalg.det(m.cov))
 
-    def marginal(self, dim):
-        """Return the marginal for a given dimension."""
+    def marginalize(self, dim):
+        """Return the marginalize for a given dimension."""
         return Gaussian(self.mean[np.ix_(dim, [0])],
                         self.cov[np.ix_(dim, dim)])
 

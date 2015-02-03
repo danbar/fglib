@@ -97,23 +97,23 @@ class TestDiscrete(unittest.TestCase):
     def test_marginal(self):
         res = np.array([0.4, 0.6])
         res /= np.sum(res)
-        marginal = self.rv3.marginal(self.x1)
-        npt.assert_almost_equal(marginal.pmf, res)
+        marginalize = self.rv3.marginalize(self.x1)
+        npt.assert_almost_equal(marginalize.pmf, res)
 
         res = np.array([0.3, 0.7])
         res /= np.sum(res)
-        marginal = self.rv3.marginal(self.x2)
-        npt.assert_almost_equal(marginal.pmf, res)
+        marginalize = self.rv3.marginalize(self.x2)
+        npt.assert_almost_equal(marginalize.pmf, res)
 
     def test_max(self):
         res = np.array([0.3, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.max(self.x1)
+        amax = self.rv3.maximize(self.x1)
         npt.assert_almost_equal(amax.pmf, res)
 
         res = np.array([0.2, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.max(self.x2)
+        amax = self.rv3.maximize(self.x2)
         npt.assert_almost_equal(amax.pmf, res)
 
     def test_argmax(self):
@@ -185,7 +185,7 @@ class TestDiscrete(unittest.TestCase):
 #                          2 * np.pi * np.sqrt(np.linalg.det(self.g4.cov)))
 # 
 #     def test_marginal(self):
-#         self.assertEqual(self.g4.marginal([0]), self.g1)
+#         self.assertEqual(self.g4.marginalize([0]), self.g1)
 # 
 #     @unittest.skip("Method is not implemented.")
 #     def test_log(self):

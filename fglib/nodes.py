@@ -248,7 +248,7 @@ class FNode(Node):
 
         # Integration/Summation over incoming variables
         for n in self.neighbors(tnode):
-            msg = msg.marginal(n)
+            msg = msg.marginalize(n)
 
         return msg
 
@@ -266,7 +266,7 @@ class FNode(Node):
         # Maximization over incoming variables
         for n in self.neighbors(tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
-            msg = msg.max(n)
+            msg = msg.maximize(n)
 
         return msg
 
