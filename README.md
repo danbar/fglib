@@ -14,6 +14,16 @@ Dependencies
 * NumPy 1.8 or later
 * matplotlib 1.3 or later
 
+Documentation
+-------------
+
+In order to generate the documentation site for the factor graph library, execute the following commands from the top-level directory.
+
+```
+$ cd docs/
+$ make html
+```
+
 Example
 -------
 
