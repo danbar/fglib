@@ -3,7 +3,7 @@
 fglib
 =====
 
-fglib (factor graph library) is a Python 3 package to simulate message passing on factor graphs.
+The factor graph library (fglib) is a Python 3 package to simulate message passing on factor graphs.
 
 The project is in the development phase.
 

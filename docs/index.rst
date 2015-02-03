@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to fglib's documentation!
-=================================
+Factor graph library
+====================
+
+The factor graph library (fglib) is a Python 3 package to simulate message passing on factor graphs.
 
 Contents:
 
