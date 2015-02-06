@@ -3,12 +3,12 @@
 This module contains different functions to perform inference on factor graphs.
 
 Functions:
-belief_propagation -- Belief propagation
-sum_product -- Sum-product algorithm
-max_product -- Max-product algorithm
-max_sum -- Max-sum algorithm
-loopy_belief_propagation -- Loopy belief propagation
-mean_field -- Mean-field algorithm
+    belief_propagation: Belief propagation
+    sum_product: Sum-product algorithm
+    max_product: Max-product algorithm
+    max_sum: Max-sum algorithm
+    loopy_belief_propagation: Loopy belief propagation
+    mean_field: Mean-field algorithm
 
 """
 

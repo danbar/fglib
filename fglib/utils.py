@@ -1,11 +1,11 @@
-"""Utilities for the fglib package.
+"""Module for utilities.
 
 This module contains auxiliary functions for factor graphs.
 
 Functions:
-draw -- Draw factor graph with nodes, edges, and labels
-draw_message -- Draw messages of a factor graph
-draw_attribute -- Draw node attributes of a factor graph
+    draw: Draw a factor graph with nodes, edges and labels.
+    draw_message: Draw messages of a factor graph.
+    draw_attribute: Draw node attributes of a factor graph.
 
 """
 

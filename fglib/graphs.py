@@ -4,10 +4,10 @@ This module contains the base class for factor graphs
 with additional functions to convert arbitrary graphs to factor graphs.
 
 Classes:
-FactorGraph -- Factor graph
+    FactorGraph: Class for factor graphs.
 
 Functions:
-convert_to_fg -- Convert to factor graph function
+    convert_to_fg: Convert to factor graph function.
 
 """
 

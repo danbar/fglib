@@ -1,10 +1,11 @@
 """Module for random variables.
 
-This module contains classes for random variables.
+This module contains classes for different random variables and exceptions.
 
 Classes:
-Discrete -- Discrete random variable
-Gaussian -- Gaussian random variable
+    ParameterException: Exception for invalid parameters.
+    Discrete: Class for discrete random variables.
+    Gaussian: Class for Gaussian random variables.
 
 """
 
@@ -20,22 +21,31 @@ class ParameterException(Exception):
 
 class Discrete(object):
 
-    """Discrete random variable.
+    """Class for discrete random variables.
 
-    Discrete random variables are internally implemented using
-    multidimensional arrays for storing the probability mass function.
+    A discrete random variable is defined by a single- or multi-dimensional
+    probability mass function. In addition, each dimension of the probability
+    mass function has to be associated with a variable. The variable is
+    represented by a variable node of the comprehensive factor graph.
 
     """
 
     def __init__(self, raw_pmf, *args):
-        """Discrete random variable.
+        """Initialize a discrete random variable.
 
-        Create a discrete random variable with corresponding
-        probability mass function.
+        Create a new discrete random variable with the given probability
+        mass function over the given variable nodes.
 
-        Positional arguments:
-        pmf -- probability mass function
-        dim -- dimensions
+        Args:
+            raw_pmf: A Numpy array representing the probability mass function.
+            *args: Instances of the class VNode representing the variables of
+                the probability mass function. The number of the positional
+                arguments must match the number of dimensions of the Numpy
+                array.
+
+        Raises:
+            ParameterException: An error occurred initializing with invalid
+                parameters.
 
         """
         pmf = np.asarray(raw_pmf, dtype=np.float64)
@@ -53,54 +63,112 @@ class Discrete(object):
             self.dim = args
 
     def __str__(self):
-        """Return string representation."""
+        """Return string representation of the discrete random variable."""
         return str(self.pmf)
 
     def __add__(self, other):
-        """Add other to self and return the result."""
+        """Add other to self and return the result.
+
+        Args:
+            other: Summand for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the summation.
+
+        """
         pmf = np.convolve(self.pmf, other.pmf, 'same')
+
         return Discrete(pmf, self.dim)
 
     def __sub__(self, other):
-        """Subtract other from self and return the result."""
+        """Subtract other from self and return the result.
+
+        Args:
+            other: Subtrahend for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the summation
+
+        """
         pmf = np.convolve(self.pmf[::-1], other.pmf, 'same')
+
         return Discrete(pmf, self.dim)
 
     def __mul__(self, other):
-        """Multiply other with self and return the result."""
+        """Multiply other with self and return the result.
+
+        Args:
+            other: Multiplier for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the multiplication.
+
+        """
+        # Verify dimensions of multiplicand and multiplier.
         if len(self.dim) < len(other.dim):
             self._expand(other.dim)
         elif len(self.dim) > len(other.dim):
             other._expand(self.dim)
 
+        # Normalize probability mass function.
         pmf = self.pmf * other.pmf
         pmf /= np.sum(pmf)
+
         return Discrete(pmf, *self.dim)
 
     def __iadd__(self, other):
-        """Method for augmented addition."""
+        """Method for augmented addition.
+
+        Args:
+            other: Summand for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the summation.
+
+        """
         return self.__add__(other)
 
     def __isub__(self, other):
-        """Method for augmented subtraction."""
+        """Method for augmented subtraction.
+
+        Args:
+            other: Subtrahend for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the summation
+
+        """
         return self.__sub__(other)
 
     def __imul__(self, other):
-        """Method for augmented multiplication."""
+        """Method for augmented multiplication.
+
+        Args:
+            other: Multiplier for the discrete random variable.
+
+        Returns:
+            A new discrete random variable representing the multiplication.
+
+        """
         return self.__mul__(other)
 
     def __eq__(self, other):
-        """Compare self with other and return the boolean result."""
+        """Compare self with other and return the boolean result.
+
+        Two discrete random variables are equal only if the probability mass
+        functions are equal and the order of dimensions are equal.
+
+        """
         return np.allclose(self.pmf, other.pmf) \
             and self.dim == other.dim
 
     def _expand(self, dims):
         """Expand dimensions.
 
-        Expand the discrete random variable with the given new dimensions.
+        Expand the discrete random variable along the given new dimensions.
 
-        Positional arguments:
-        dims -- new dimensions
+        Args:
+            dims: List of discrete random variables.
 
         """
         reps = [1, ] * len(dims)
@@ -118,7 +186,19 @@ class Discrete(object):
         self.dim = dims
 
     def marginalize(self, *dims):
-        """Return the marginal for a given dimension."""
+        """Return the marginal for given dimensions.
+
+        The probability mass function of the discrete random variable is
+        marginalized along the given dimensions.
+
+        Args:
+            *dims: Instances of discrete random variables, which should be
+                marginalized out.
+
+        Returns:
+            A new discrete random variable representing the marginal.
+
+        """
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.sum(self.pmf, axis)
         pmf /= np.sum(pmf)
@@ -127,7 +207,19 @@ class Discrete(object):
         return Discrete(pmf, *new_dims)
 
     def maximize(self, *dims):
-        """Return the maximum for a given dimension."""
+        """Return the maximum for given dimensions.
+
+        The probability mass function of the discrete random variable is
+        maximized along the given dimensions.
+
+        Args:
+            *dims: Instances of discrete random variables, which should be
+                maximized out.
+
+        Returns:
+            A new discrete random variable representing the maximum.
+
+        """
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.amax(self.pmf, axis)
         pmf /= np.sum(pmf)
@@ -136,23 +228,42 @@ class Discrete(object):
         return Discrete(pmf, *new_dims)
 
     def argmax(self, dim=None):
-        """Return the argument of the maximum for a given dimension."""
+        """Return the dimension index of the maximum.
+
+        Args:
+            dim: An optional discrete random variable along a marginalization
+                should be performed and the maximum is searched over the
+                remaining dimensions. In the case of None, the maximum is
+                search along all dimensions.
+
+        Returns:
+            An integer representing the dimension of the maximum.
+
+        """
         if dim is None:
             return np.unravel_index(self.pmf.argmax(), self.pmf.shape)
         m = self.marginalize(dim)
         return np.argmax(m.pmf)
 
     def log(self):
-        """Return the natural logarithm of the random variable."""
+        """Natural logarithm of the discrete random variable.
+
+        Returns:
+            A new discrete random variable with the natural logarithm of the
+            probablitiy mass function.
+
+        """
         return Discrete(np.log(self.value), self.dim)
 
 
 class Gaussian(object):
 
-    """Gaussian random variable.
+    """Class for Gaussian random variables.
 
-    Gaussian random variable are internally implemented using
-    the information form for storing the probability density function.
+    A Gaussian random variable is defined by a mean vector and a covariance
+    matrix. In addition, each dimension of the mean vector and the covariance
+    matrix has to be associated with a variable. The variable is
+    represented by a variable node of the comprehensive factor graph.
 
     """
 

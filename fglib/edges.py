@@ -1,10 +1,10 @@
-"""Module for factor graph edges.
+"""Module for edges of factor graphs.
 
-This module contains edge classes,
+This module contains classes for edges of factor graphs,
 which are used to build factor graphs.
 
 Classes:
-Edge -- Edge
+    Edge: Class for edges.
 
 """
 

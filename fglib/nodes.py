@@ -1,14 +1,14 @@
-"""Module for factor graph nodes.
+"""Module for nodes of factor graphs.
 
-This module contains node classes,
+This module contains classes for nodes of factor graphs,
 which are used to build factor graphs.
 
 Classes:
-Node -- Abstract node
-VNode -- Variable node
-IOVNode -- Input-output variable node
-FNode -- Factor node
-IOFNode -- Input-output factor node
+    Node: Abstract class for nodes.
+    VNode: Class for variable nodes.
+    IOVNode: Class for custom input-output variable nodes.
+    FNode: Class for factor nodes.
+    IOFNode: Class for custom input-output factor nodes.
 
 """
 
@@ -23,6 +23,8 @@ from . import rv
 
 
 class NodeType(Enum):
+
+    """Enumeration for node types."""
 
     variable_node = 1
     factor_node = 2
