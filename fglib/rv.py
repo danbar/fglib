@@ -54,13 +54,21 @@ class Discrete(object):
         if not np.allclose(np.sum(pmf), 1):
             raise ParameterException('Invalid probability mass function.')
         else:
-            self.pmf = pmf
+            self._pmf = pmf
 
         # Set variable nodes for dimensions
         if np.ndim(pmf) != len(args):
             raise ParameterException('Dimension mismatch.')
         else:
-            self.dim = args
+            self._dim = args
+
+    @property
+    def pmf(self):
+        return self._pmf
+
+    @property
+    def dim(self):
+        return self._dim
 
     def __str__(self):
         """Return string representation of the discrete random variable."""
@@ -178,12 +186,12 @@ class Discrete(object):
 
         # Expand missing dimensions
         for d in diff:
-            self.pmf = np.expand_dims(self.pmf, axis=d)
+            self._pmf = np.expand_dims(self.pmf, axis=d)
             reps[d] = 2
 
         # Repeat missing dimensions
-        self.pmf = np.tile(self.pmf, reps)
-        self.dim = dims
+        self._pmf = np.tile(self.pmf, reps)
+        self._dim = dims
 
     def marginalize(self, *dims):
         """Return the marginal for given dimensions.
