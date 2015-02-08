@@ -7,7 +7,8 @@ Classes:
     FactorGraph: Class for factor graphs.
 
 Functions:
-    convert_to_fg: Convert to factor graph function.
+    convert_bipartite_graph_to_factor_graph: Convert bipartite graph to
+        factor graph.
 
 """
 
@@ -126,57 +127,46 @@ class FactorGraph(nx.Graph):
                 if d['type'] == nodes.NodeType.factor_node]
 
 
-def convert_to_fg(graph, vnode, fnode, bipartite=False):
-    """Convert to factor graph function.
+def convert_bipartite_graph_to_factor_graph(graph, vnode, fnode):
+    """Convert bipartite graph to factor graph.
 
-    Convert NetworkX graph to a factor graph.
-    If origin graph is not bipartite, all nodes are replaced by instances
-    of the given variable node class.
-    If origin graph is bipartite, all nodes with label 'bipartite' == 0 are
+    Convert a bipartite graph from the NetworkX library to a factor graph.
+    For the bipartite graph, all nodes with label 'bipartite' equal to 0 are
     replaced by instances of the given variable node class and all nodes with
-    label 'bipartite' == 1 are replaced by instances of the given factor node
-    class.
-    All new nodes in the generated factor graph get a label 'origin',
-    which indicated the label of the origin node of the origin graph.
-    The generated factor graph is returned.
+    label 'bipartite' equal to 1 are replaced by instances of the given factor
+    node class.
+    All variable and factor nodes in the generated factor graph get a label
+    'origin', which indicates the label of the origin node of the origin graph.
 
-    Positional arguments:
-    graph -- the origin graph used for conversion
-    vnode -- variable node class used instead of all origin variable nodes.
-    fnode -- factor node class used instead of all origin factor nodes
+    Args:
+        graph: Bipartite graph used for conversion.
+        vnode: Variable node class.
+        fnode: Factor node class.
 
-    Keyword arguments:
-    bipartite -- boolean if given graph is already bipartite
+    Returns:
+        A factor graph.
 
     """
-    mapping = dict(zip(graph, graph))
+    # Initialize factor graph
     fgraph = FactorGraph()
 
-    if bipartite:
-        vn = [n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 0]
-        fn = [n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 1]
+    # Create mapping
+    mapping = dict(zip(graph, graph))
 
-        obj_box = [vnode(i) for i in range(len(vn))]
-        mapping.update((n, obj_box.pop()) for n in vn)
-        obj_box = [fnode(i, None) for i in range(len(fn))]
-        mapping.update((n, obj_box.pop()) for n in fn)
-        graph = nx.relabel_nodes(graph, mapping)  # Returns a copy of 'graph'.
+    # Insert variable nodes into mapping
+    vn = (n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 0)
+    vn_instances = [vnode(i) for i, _ in enumerate(vn)]
+    mapping.update((n, vn_instances.pop()) for n in vn)
 
-        # Build factor graph
-        fgraph.set_nodes(graph.nodes())
-        fgraph.set_edges(graph.edges())
-    else:
-        obj_box = [vnode(i) for i in range(graph.number_of_nodes())]
-        mapping.update((n, obj_box.pop()) for n in graph.nodes())
-        graph = nx.relabel_nodes(graph, mapping)  # Returns a copy of 'graph'.
+    # Insert factor nodes into mapping
+    fn = (n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 1)
+    fn_instances = [fnode(i) for i, _ in enumerate(fn)]
+    mapping.update((n, fn_instances.pop()) for n in fn)
 
-        # Build factor graph
-        fgraph.set_nodes(graph.nodes())
-        i = list(range(graph.number_of_edges()))
-        for e in graph.edges_iter():
-            n = fnode(i.pop(), None)
-            fgraph.set_node(n)
-            fgraph.set_edges([(e[0], n), (n, e[1])])
+    # Map graph to factor graph
+    graph = nx.relabel_nodes(graph, mapping)  # Returns a copy
+    fgraph.set_nodes(graph.nodes())
+    fgraph.set_edges(graph.edges())
 
     # Node attribute to identify original node
     origin = {v: k for k, v in mapping.items()}
