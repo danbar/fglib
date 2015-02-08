@@ -18,49 +18,110 @@ from . import nodes, edges
 
 class FactorGraph(nx.Graph):
 
-    """Base class for a factor graph.
+    """Class for factor graphs.
 
-    The factor graph base class is inherited from the base class
+    A factor graphs represents the factorization of a function of several
+    variables. Assume, for example, that some function f(x1, x2, x3, x4) can
+    be factored as
+
+        f(x1, x2, x3, x4) = fa(x1, x2) fb(x2, x3) fc(x2, x4).
+
+    The factor graph representing the factorization is given as
+
+      /--\      +----+      /--\      +----+      /--\
+     | x1 |-----| fa |-----| x2 |-----| fb |-----| x3 |
+      \--/      +----+      \--/      +----+      \--/
+                             |
+                           +----+
+                           | fc |
+                           +----+
+                             |
+                            /--\
+                           | x4 |
+                            \--/.
+
+    The class for factor graphs is inherited from the base class
     for undirected graphs of the NetworkX library.
 
     """
 
     def __init__(self):
-        """Create a factor graph."""
+        """Initialize a factor graph."""
         super().__init__(self, name="Factor Graph")
 
-        # Normalization constant 1/Z
-        self.norm_const = None       # Really useful?
-
     def set_node(self, node, **attr):
-        """Place a node in the factor graph."""
+        """Add a single node to the factor graph.
+
+        A single node is added to the factor graph.
+        Optional attributes can be added to the single node by using keyword
+        arguments.
+
+        Args:
+            node: A single node
+            **attr: Optional attributes
+
+        """
         node.graph = self
         FactorGraph.add_node(self, node,
                              attr,
                              type=node.type)
 
     def set_nodes(self, nodes):
-        """Place multiple nodes from list in the factor graph."""
+        """Add multiple nodes to the factor graph.
+
+        Multiple nodes are added to the factor graph.
+
+        Args:
+            nodes: A list of multiple nodes
+
+        """
         for n in nodes:
             self.set_node(n)
 
     def set_edge(self, snode, tnode, init=None):
-        """Place an edge in the factor graph."""
+        """Add a single edge to the factor graph.
+
+        A single edge is added to the factor graph.
+        It can be initialized with a given random variable.
+
+        Args:
+            snode: Source node for edge
+            tnode: Target node for edge
+            init: Initial message for edge
+
+        """
         self.add_edge(snode, tnode,
                       object=edges.Edge(snode, tnode, init))
 
     def set_edges(self, edges):
-        """Place multiple edges from list in the factor graph."""
+        """Add multiple edges to the factor graph.
+
+        Multiple edges are added to the factor graph.
+
+        Args:
+            edges: A list of multiple edges
+
+        """
         for (snode, tnode) in edges:
             self.set_edge(snode, tnode)
 
     def get_vnodes(self):
-        """Return list of all variable nodes."""
+        """Return variable nodes of the factor graph.
+
+        Returns:
+            A list of all variable nodes.
+
+        """
         return [n for (n, d) in self.nodes(data=True)
                 if d['type'] == nodes.NodeType.variable_node]
 
     def get_fnodes(self):
-        """Return list of all factor nodes."""
+        """Return factor nodes of the factor graph.
+
+        Returns:
+            A list of all factor nodes.
+
+        """
         return [n for (n, d) in self.nodes(data=True)
                 if d['type'] == nodes.NodeType.factor_node]
 

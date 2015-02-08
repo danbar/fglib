@@ -1,6 +1,6 @@
 """Module for random variables.
 
-This module contains classes for different random variables and exceptions.
+This module contains classes for random variables and exceptions.
 
 Classes:
     ParameterException: Exception for invalid parameters.
