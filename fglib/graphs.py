@@ -7,8 +7,7 @@ Classes:
     FactorGraph: Class for factor graphs.
 
 Functions:
-    convert_bipartite_graph_to_factor_graph: Convert bipartite graph to
-        factor graph.
+    convert_graph_to_factor_graph: Convert bipartite graph to factor graph.
 
 """
 
@@ -127,7 +126,7 @@ class FactorGraph(nx.Graph):
                 if d['type'] == nodes.NodeType.factor_node]
 
 
-def convert_bipartite_graph_to_factor_graph(graph, vnode, fnode):
+def convert_graph_to_factor_graph(graph, vnode, fnode):
     """Convert bipartite graph to factor graph.
 
     Convert a bipartite graph from the NetworkX library to a factor graph.
@@ -135,8 +134,6 @@ def convert_bipartite_graph_to_factor_graph(graph, vnode, fnode):
     replaced by instances of the given variable node class and all nodes with
     label 'bipartite' equal to 1 are replaced by instances of the given factor
     node class.
-    All variable and factor nodes in the generated factor graph get a label
-    'origin', which indicates the label of the origin node of the origin graph.
 
     Args:
         graph: Bipartite graph used for conversion.
@@ -154,22 +151,18 @@ def convert_bipartite_graph_to_factor_graph(graph, vnode, fnode):
     mapping = dict(zip(graph, graph))
 
     # Insert variable nodes into mapping
-    vn = (n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 0)
-    vn_instances = [vnode(i) for i, _ in enumerate(vn)]
+    vn = [n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 0]
+    vn_instances = [vnode(label) for _, label in enumerate(vn)]
     mapping.update((n, vn_instances.pop()) for n in vn)
 
     # Insert factor nodes into mapping
-    fn = (n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 1)
-    fn_instances = [fnode(i) for i, _ in enumerate(fn)]
+    fn = [n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 1]
+    fn_instances = [fnode(label) for _, label in enumerate(fn)]
     mapping.update((n, fn_instances.pop()) for n in fn)
 
     # Map graph to factor graph
     graph = nx.relabel_nodes(graph, mapping)  # Returns a copy
     fgraph.set_nodes(graph.nodes())
     fgraph.set_edges(graph.edges())
-
-    # Node attribute to identify original node
-    origin = {v: k for k, v in mapping.items()}
-    nx.set_node_attributes(fgraph, 'origin', origin)
 
     return fgraph
