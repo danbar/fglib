@@ -95,7 +95,7 @@ class Discrete(object):
             other: Subtrahend for the discrete random variable.
 
         Returns:
-            A new discrete random variable representing the summation
+            A new discrete random variable representing the subtraction.
 
         """
         pmf = np.convolve(self.pmf[::-1], other.pmf, 'same')
@@ -143,7 +143,7 @@ class Discrete(object):
             other: Subtrahend for the discrete random variable.
 
         Returns:
-            A new discrete random variable representing the summation
+            A new discrete random variable representing the subtraction.
 
         """
         return self.__sub__(other)
@@ -196,8 +196,8 @@ class Discrete(object):
     def marginalize(self, *dims):
         """Return the marginal for given dimensions.
 
-        The probability mass function of the discrete random variable is
-        marginalized along the given dimensions.
+        The probability mass function of the discrete random variable
+        is marginalized along the given dimensions.
 
         Args:
             *dims: Instances of discrete random variables, which should be
@@ -217,8 +217,8 @@ class Discrete(object):
     def maximize(self, *dims):
         """Return the maximum for given dimensions.
 
-        The probability mass function of the discrete random variable is
-        maximized along the given dimensions.
+        The probability mass function of the discrete random variable
+        is maximized along the given dimensions.
 
         Args:
             *dims: Instances of discrete random variables, which should be
@@ -275,112 +275,231 @@ class Gaussian(object):
 
     """
 
-    def __init__(self, mean=[[0]], cov=[[1]]):
-        """Gaussian random variable.
+    def __init__(self, raw_mean, raw_cov, *args):
+        """Initialize a Gaussian random variable.
 
-        Create a Gaussian random variable with corresponding
-        mean and covariance matrix.
+        Create a new Gaussian random variable with the given mean vector and
+        the given covariance matrix over the given variable nodes.
 
-        Keyword arguments:
-        mean -- mean vector
-        cov -- covariance matrix
+        Args:
+            raw_mean: A Numpy array representing the mean vector.
+            raw_cov: A Numpy array representing the covariance matrix.
+            *args: Instances of the class VNode representing the variables of
+                the mean vector and covariance matrix, respectively. The number
+                of the positional arguments must match the number of dimensions
+                of the Numpy arrays.
+
+        Raises:
+            ParameterException: An error occurred initializing with invalid
+                parameters.
 
         """
-        self.W = np.linalg.inv(np.asarray(cov))  # Precision matrix
-        self.Wm = np.dot(self.W, np.asarray(mean))  # Precision-mean vector
-        self.ndim = self.W.shape[0]  # Number of dimensions
+        if raw_mean is not None and raw_cov is not None:
+            mean = np.asarray(raw_mean, dtype=np.float64)
+            cov = np.asarray(raw_cov, dtype=np.float64)
+
+            # Set mean vector and covariance matrix
+            if mean.shape[0] != cov.shape[0]:
+                raise ParameterException('Dimension mismatch.')
+            else:
+                # Precision matrix
+                self._W = np.linalg.inv(np.asarray(cov))
+                # Precision-mean vector
+                self._Wm = np.dot(self._W, np.asarray(mean))
+
+            # Set variable nodes for dimensions
+            if cov.shape[0] != len(args):
+                raise ParameterException('Dimension mismatch.')
+            else:
+                self._dim = args
+
+        else:
+            self._dim = args
 
     @classmethod
-    def moment_form(cls, m, V):
-        """Return a Gaussian random variable from a given moment form."""
-        return Gaussian(m, V)
+    def inf_form(cls, raw_W, raw_Wm, *args):
+        """...
 
-    @classmethod
-    def information_form(cls, W, Wm):
-        """Return a Gaussian random variable from a given information form."""
-        self = Gaussian()
-        self.W = np.asarray(W)
-        self.Wm = np.asarray(Wm)
-        self.ndim = self.W.shape[0]
-        return self
+        ...
 
-    @property
-    def m(self):
-        """Return the mean vector."""
-        return np.dot(np.linalg.inv(self.W), self.Wm)
-
-    @property
-    def V(self):
-        """Return the covariance matrix."""
-        return np.linalg.inv(self.W)
+        """
+        g = Gaussian(None, None, *args)
+        g._W = np.asarray(raw_W, dtype=np.float64)
+        g._Wm = np.asarray(raw_Wm, dtype=np.float64)
+        return g
 
     @property
     def mean(self):
-        """Return the mean vector."""
-        return self.m
+        return np.dot(np.linalg.inv(self._W), self._Wm)
 
     @property
     def cov(self):
-        """Return the covariance matrix."""
-        return self.V
+        return np.linalg.inv(self._W)
+
+    @property
+    def dim(self):
+        return self._dim
 
     def __str__(self):
-        """Return string representation."""
+        """Return string representation of the Gaussian random variable."""
         return "%s %s" % (self.mean, self.cov)
 
     def __add__(self, other):
-        """Add other to self and return the result."""
+        """Add other to self and return the result.
+
+        Args:
+            other: Summand for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the summation.
+
+        """
         return Gaussian(self.mean + other.mean,
-                        self.cov + other.cov)
+                        self.cov + other.cov,
+                        *self.dim)
 
     def __sub__(self, other):
-        """Subtract other from self and return the result."""
+        """Subtract other from self and return the result.
+
+        Args:
+            other: Subrahend for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the subtraction.
+
+        """
         return Gaussian(self.mean - other.mean,
-                        self.cov - other.cov)
+                        self.cov - other.cov,
+                        *self.dim)
 
     def __mul__(self, other):
-        """Multiply other with self and return the result."""
-        W = self.W + other.W
-        Wm = self.Wm + other.Wm
-        return Gaussian.information_form(W, Wm)
+        """Multiply other with self and return the result.
+
+        Args:
+            other: Multiplier for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the multiplication.
+
+        """
+        W = self._W + other._W
+        Wm = self._Wm + other._Wm
+        return Gaussian.inf_form(W, Wm, *self.dim)
 
     def __iadd__(self, other):
-        """Method for augmented addition."""
+        """Method for augmented addition.
+
+        Args:
+            other: Summand for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the summation.
+
+        """
         return self.__add__(other)
 
     def __isub__(self, other):
-        """Method for augmented subtraction."""
+        """Method for augmented subtraction.
+
+        Args:
+            other: Subtrahend for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the subtraction.
+
+        """
         return self.__sub__(other)
 
     def __imul__(self, other):
-        """Method for augmented multiplication."""
+        """Method for augmented multiplication.
+
+        Args:
+            other: Multiplier for the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable representing the multiplication.
+
+        """
         return self.__mul__(other)
 
     def __eq__(self, other):
-        """Compare self with other and return the boolean result."""
-        return np.allclose(self.W, other.W) \
-            and np.allclose(self.Wm, other.Wm)
+        """Compare self with other and return the boolean result.
+
+        Two Gaussian random variables are equal only if the mean vectors and
+        the covariance matrices are equal and the order of dimensions are
+        equal.
+
+        """
+        return np.allclose(self._W, other._W) \
+            and np.allclose(self._Wm, other._Wm) \
+            and self.dim == other.dim
+
+    def marginalize(self, *dims):
+        """Return the marginal for given dimensions.
+
+        The probability density function of the Gaussian random variable
+        is marginalized along the given dimensions.
+
+        Args:
+            *dims: Instances of Gaussian random variables, which should be
+                marginalized out.
+
+        Returns:
+            A new Gaussian random variable representing the marginal.
+
+        """
+        axis = tuple(idx for idx, d in enumerate(self.dim) if d not in dims)
+        mean = self.mean[np.ix_(axis, [0])]
+        cov = self.cov[np.ix_(axis, axis)]
+
+        new_dims = tuple(d for d in self.dim if d not in dims)
+        return Gaussian(mean, cov, *new_dims)
+
+    def maximize(self, *dims):
+        """Return the maximum for given dimensions.
+
+        The probability density function of the Gaussian random variable
+        is maximized along the given dimensions.
+
+        Args:
+            *dims: Instances of Gaussian random variables, which should be
+                maximized out.
+
+        Returns:
+            A new Gaussian random variable representing the maximum.
+
+        """
+        axis = tuple(idx for idx, d in enumerate(self.dim) if d not in dims)
+        mean = self.mean[np.ix_(axis, [0])]
+        cov = self.cov[np.ix_(axis, axis)]
+
+        new_dims = tuple(d for d in self.dim if d not in dims)
+        return Gaussian(mean, cov, *new_dims)
 
     def argmax(self, dim=None):
-        """Return the argument of the maximum for a given dimension."""
+        """Return the dimension index of the maximum.
+
+        Args:
+            dim: An optional Gaussian random variable along a marginalization
+                should be performed and the maximum is searched over the
+                remaining dimensions. In the case of None, the maximum is
+                search along all dimensions.
+
+        Returns:
+            An integer representing the dimension of the maximum.
+
+        """
         if dim is None:
             return self.mean
-        return self.mean[np.ix_(dim, [0])]
-
-    def max(self, dim=None):
-        """Return the maximum for a given dimension."""
-        if dim is None:
-            return np.power(2 * np.pi, self.ndim / 2) * \
-                np.sqrt(np.linalg.det(self.cov))
         m = self.marginalize(dim)
-        return np.power(2 * np.pi, m.ndim / 2) * np.sqrt(np.linalg.det(m.cov))
-
-    def marginalize(self, dim):
-        """Return the marginalize for a given dimension."""
-        return Gaussian(self.mean[np.ix_(dim, [0])],
-                        self.cov[np.ix_(dim, dim)])
+        return m.mean
 
     def log(self):
-        """Return the natural logarithm of the random variable."""
-        # TODO: Not implemented for Gaussian random variable.
+        """Natural logarithm of the Gaussian random variable.
+
+        Returns:
+            A new Gaussian random variable with the natural logarithm of the
+            probability density function.
+
+        """
         raise NotImplementedError
