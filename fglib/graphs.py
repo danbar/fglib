@@ -20,9 +20,9 @@ class FactorGraph(nx.Graph):
 
     """Class for factor graphs.
 
-    A factor graphs represents the factorization of a function of several
-    variables. Assume, for example, that some function f(x1, x2, x3, x4) can
-    be factored as
+    A factor graph represents the factorization of a function of
+    several variables. Assume, for example, that some function
+    f(x1, x2, x3, x4) can be factored as
 
         f(x1, x2, x3, x4) = fa(x1, x2) fb(x2, x3) fc(x2, x4).
 
@@ -41,7 +41,7 @@ class FactorGraph(nx.Graph):
                             \--/.
 
     The class for factor graphs is inherited from the base class
-    for undirected graphs of the NetworkX library.
+    for undirected graphs (of the NetworkX library).
 
     """
 
@@ -124,6 +124,43 @@ class FactorGraph(nx.Graph):
         """
         return [n for (n, d) in self.nodes(data=True)
                 if d['type'] == nodes.NodeType.factor_node]
+
+
+def ForneyFactorGraph(FactorGraph):
+
+    """Class  for Forney-style factor graphs.
+
+    A Forney-style factor graph represents the factorization of a function of
+    several variables. Assume, for example, that some function
+    f(x1, x2, x3, x4) can be factored as
+
+        f(x1, x2, x3, x4) = fa(x1, x2) fb(x2, x3) fc(x2, x4).
+
+    The factor graph representing the factorization is given as
+
+      x1  +----+  x2 +----+ x2' +----+  x3
+     -----| fa |-----| =  |-----| fb |-----
+          +----+     +----+     +----+
+                       |
+                       | x2''
+                       |
+                     +----+
+                     | fc |
+                     +----+
+                       |
+                       | x4.
+                       |
+
+    The class for Forney-style factor graphs is inherited from the base class
+    for factor graphs.
+
+    """
+
+    def __init__(self):
+        """Initialize a Forney-style factor graph."""
+        super().__init__(self)
+
+    # TODO: Needs to be implemented!
 
 
 def convert_graph_to_factor_graph(graph, vnode, fnode):
