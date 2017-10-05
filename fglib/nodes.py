@@ -118,7 +118,7 @@ class VNode(Node):
 
     def belief(self):
         """Return belief of the variable node."""
-        iterator = self.graph.neighbors_iter(self)
+        iterator = self.graph.neighbors(self)
 
         # Pick first node
         n = next(iterator)

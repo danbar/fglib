@@ -49,7 +49,7 @@ class FactorGraph(nx.Graph):
         """Initialize a factor graph."""
         super().__init__(self, name="Factor Graph")
 
-    def set_node(self, node, **attr):
+    def set_node(self, node):
         """Add a single node to the factor graph.
 
         A single node is added to the factor graph.
@@ -58,13 +58,10 @@ class FactorGraph(nx.Graph):
 
         Args:
             node: A single node
-            **attr: Optional attributes
 
         """
         node.graph = self
-        FactorGraph.add_node(self, node,
-                             attr,
-                             type=node.type)
+        self.add_node(node, type=node.type)
 
     def set_nodes(self, nodes):
         """Add multiple nodes to the factor graph.

@@ -10,7 +10,8 @@ The project is in the development phase.
 Dependencies
 ------------
 
-* NetworkX 1.7 or later
+* Python 3
+* NetworkX 2
 * NumPy 1.8 or later
 * matplotlib 1.3 or later
 
