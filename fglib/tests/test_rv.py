@@ -41,6 +41,7 @@ class TestDiscrete(unittest.TestCase):
         res /= np.sum(res)
 
         mul = self.rv1 * self.rv1
+        mul = mul.normalize()
 
         npt.assert_almost_equal(mul.pmf, res)
         self.assertEqual(mul.dim, (self.x1,))
@@ -51,6 +52,7 @@ class TestDiscrete(unittest.TestCase):
         res /= np.sum(res)
 
         mul = self.rv1 * self.rv3
+        mul = mul.normalize()
 
         npt.assert_almost_equal(mul.pmf, res)
         self.assertEqual(mul.dim, (self.x1, self.x2))
@@ -61,6 +63,7 @@ class TestDiscrete(unittest.TestCase):
         res /= np.sum(res)
 
         mul = self.rv3 * self.rv1
+        mul = mul.normalize()
 
         npt.assert_almost_equal(mul.pmf, res)
         self.assertEqual(mul.dim, (self.x1, self.x2))
@@ -71,6 +74,7 @@ class TestDiscrete(unittest.TestCase):
         res /= np.sum(res)
 
         mul = self.rv2 * self.rv3
+        mul = mul.normalize()
 
         npt.assert_almost_equal(mul.pmf, res)
         self.assertEqual(mul.dim, (self.x1, self.x2))
@@ -81,17 +85,18 @@ class TestDiscrete(unittest.TestCase):
         res /= np.sum(res)
 
         mul = self.rv3 * self.rv2
+        mul = mul.normalize()
 
         npt.assert_almost_equal(mul.pmf, res)
         self.assertEqual(mul.dim, (self.x1, self.x2))
 
     def test_unit_element_1D(self):
-        rv0 = rv.Discrete([0.5, 0.5], self.x1)
+        rv0 = rv.Discrete([1, 1], self.x1)
         self.assertEqual(self.rv1 * rv0, self.rv1)
 
     def test_unit_element_2D(self):
-        rv0 = rv.Discrete([[0.25, 0.25],
-                           [0.25, 0.25]], self.x1, self.x2)
+        rv0 = rv.Discrete([[1, 1],
+                           [1, 1]], self.x1, self.x2)
         self.assertEqual(self.rv3 * rv0, self.rv3)
 
     def test_marginalize(self):

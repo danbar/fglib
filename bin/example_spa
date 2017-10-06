@@ -69,9 +69,18 @@ dist_fc = [[0.3, 0.4],
 fc.factor = rv.Discrete(dist_fc, x2, x4)
 
 # Perform sum-product algorithm on factor graph
-# and request belief of variable node x3
-belief = inference.sum_product(fg, x3)
+# and request belief of variable node x4
+belief = inference.sum_product(fg, x4)
 
-# Print belief of variable node x3
-print("Belief of variable node x3:")
+# Print belief of variables
+print("Belief of variable node x4:")
 print(belief)
+
+print("Belief of variable node x3:")
+print(x3.belief())
+
+print("Belief of variable node x2:")
+print(x2.belief(normalize=True))
+
+print("Unnormalized belief of variable node x1:")
+print(x1.belief(normalize=False))

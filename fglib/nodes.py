@@ -109,15 +109,20 @@ class VNode(Node):
         if init is not None:
             self.init = init
         else:
-            self.init = rv.Discrete(np.array([0.5, 0.5]), self)
+            self.init = rv.Discrete(np.array([1, 1]), self)
         self.observed = observed
 
     @property
     def type(self):
         return NodeType.variable_node
 
-    def belief(self):
-        """Return belief of the variable node."""
+    def belief(self, normalize=True):
+        """Return belief of the variable node.
+
+        Args:
+            normalize: Boolean flag if belief should be normalized.
+
+        """
         iterator = self.graph.neighbors(self)
 
         # Pick first node
@@ -128,11 +133,19 @@ class VNode(Node):
         for n in iterator:
             belief *= self.graph[n][self]['object'].get_message(n, self)
 
+        if normalize:
+            belief = belief.normalize()
+
         return belief
 
-    def maximum(self):
-        """Return the maximum probability of the variable node."""
-        b = self.belief()
+    def maximum(self, normalize=True):
+        """Return the maximum probability of the variable node.
+
+        Args:
+            normalize: Boolean flag if belief should be normalized.
+
+        """
+        b = self.belief(normalize)
         return np.amax(b.pmf)
 
     def argmax(self):
@@ -250,7 +263,7 @@ class FNode(Node):
 
         # Integration/Summation over incoming variables
         for n in self.neighbors(tnode):
-            msg = msg.marginalize(n)
+            msg = msg.marginalize(n, normalize=False)
 
         return msg
 
@@ -268,7 +281,7 @@ class FNode(Node):
         # Maximization over incoming variables
         for n in self.neighbors(tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
-            msg = msg.maximize(n)
+            msg = msg.maximize(n, normalize=False)
 
         return msg
 

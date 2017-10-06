@@ -38,6 +38,7 @@ class Discrete(object):
 
         Args:
             raw_pmf: A Numpy array representing the probability mass function.
+                The probability mass function does not need to be normalized.
             *args: Instances of the class VNode representing the variables of
                 the probability mass function. The number of the positional
                 arguments must match the number of dimensions of the Numpy
@@ -51,10 +52,7 @@ class Discrete(object):
         pmf = np.asarray(raw_pmf, dtype=np.float64)
 
         # Set probability mass function
-        if not np.allclose(np.sum(pmf), 1):
-            raise ParameterException('Invalid probability mass function.')
-        else:
-            self._pmf = pmf
+        self._pmf = pmf
 
         # Set variable nodes for dimensions
         if np.ndim(pmf) != len(args):
@@ -118,9 +116,7 @@ class Discrete(object):
         elif len(self.dim) > len(other.dim):
             other._expand(self.dim)
 
-        # Normalize probability mass function.
         pmf = self.pmf * other.pmf
-        pmf /= np.sum(pmf)
 
         return Discrete(pmf, *self.dim)
 
@@ -193,7 +189,12 @@ class Discrete(object):
         self._pmf = np.tile(self.pmf, reps)
         self._dim = dims
 
-    def marginalize(self, *dims):
+    def normalize(self):
+        """Normalize probability mass function."""
+        pmf = self.pmf / np.sum(self.pmf)
+        return Discrete(pmf, *self.dim)
+
+    def marginalize(self, *dims, normalize=True):
         """Return the marginal for given dimensions.
 
         The probability mass function of the discrete random variable
@@ -202,6 +203,8 @@ class Discrete(object):
         Args:
             *dims: Instances of discrete random variables, which should be
                 marginalized out.
+            normalize: Boolean flag if probability mass function should be
+                normalized after marginalization.
 
         Returns:
             A new discrete random variable representing the marginal.
@@ -209,12 +212,13 @@ class Discrete(object):
         """
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.sum(self.pmf, axis)
-        pmf /= np.sum(pmf)
+        if normalize:
+            pmf /= np.sum(pmf)
 
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)
 
-    def maximize(self, *dims):
+    def maximize(self, *dims, normalize=True):
         """Return the maximum for given dimensions.
 
         The probability mass function of the discrete random variable
@@ -223,6 +227,8 @@ class Discrete(object):
         Args:
             *dims: Instances of discrete random variables, which should be
                 maximized out.
+            normalize: Boolean flag if probability mass function should be
+                normalized after marginalization.
 
         Returns:
             A new discrete random variable representing the maximum.
@@ -230,7 +236,8 @@ class Discrete(object):
         """
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.amax(self.pmf, axis)
-        pmf /= np.sum(pmf)
+        if normalize:
+            pmf /= np.sum(pmf)
 
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)

@@ -52,6 +52,7 @@ class TestVariableNode(unittest.TestCase):
         fg[n0][n1]['object'].set_message(n0, n1, msg_in)
 
         msg_out = n1.spa(n2)
+        msg_out = msg_out.normalize()
 
         npt.assert_almost_equal(msg_out.pmf, msg_in.pmf)
         self.assertEqual(msg_out.dim, (n1,))
@@ -64,6 +65,7 @@ class TestVariableNode(unittest.TestCase):
         fg[n3][n1]['object'].set_message(n3, n1, msg_in)
 
         msg_out = n1.spa(n2)
+        msg_out = msg_out.normalize()
 
         res = np.array([0.49, 0.09])
         res /= np.sum(res)
@@ -133,6 +135,7 @@ class TestFactorNode(unittest.TestCase):
         fg[n2][n1]['object'].set_message(n2, n1, msg_in)
 
         msg_out = n1.spa(n0)
+        msg_out = msg_out.normalize()
 
         res = np.array([0.183, 0.147])
         res /= np.sum(res)
