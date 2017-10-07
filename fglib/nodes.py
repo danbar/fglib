@@ -116,6 +116,14 @@ class VNode(Node):
     def type(self):
         return NodeType.variable_node
 
+    @property
+    def init(self):
+        return self.__init
+
+    @init.setter
+    def init(self, init):
+        self.__init = init
+
     def belief(self, normalize=True):
         """Return belief of the variable node.
 

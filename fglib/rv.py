@@ -112,9 +112,9 @@ class Discrete(object):
         """
         # Verify dimensions of multiplicand and multiplier.
         if len(self.dim) < len(other.dim):
-            self._expand(other.dim)
+            self._expand(other.dim, other.pmf.shape)
         elif len(self.dim) > len(other.dim):
-            other._expand(self.dim)
+            other._expand(self.dim, self.pmf.shape)
 
         pmf = self.pmf * other.pmf
 
@@ -166,7 +166,7 @@ class Discrete(object):
         return np.allclose(self.pmf, other.pmf) \
             and self.dim == other.dim
 
-    def _expand(self, dims):
+    def _expand(self, dims, states):
         """Expand dimensions.
 
         Expand the discrete random variable along the given new dimensions.
@@ -183,7 +183,7 @@ class Discrete(object):
         # Expand missing dimensions
         for d in diff:
             self._pmf = np.expand_dims(self.pmf, axis=d)
-            reps[d] = 2
+            reps[d] = states[d]
 
         # Repeat missing dimensions
         self._pmf = np.tile(self.pmf, reps)

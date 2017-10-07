@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-"""A simple example
+"""A simple example of the sum-product algorithm
 
-This simple example of the sum-product algorithm on a factor graph
-with Bernoulli random variables is taken from page 409 of the book
+This is a simple example of the sum-product algorithm on a factor graph
+with Bernoulli random variables, which is taken from page 409 of the book
 C. M. Bishop, Pattern Recognition and Machine Learning. Springer, 2006.
 
       /--\      +----+      /--\      +----+      /--\
