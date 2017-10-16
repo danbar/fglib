@@ -4,9 +4,9 @@ fglib
 =====
 
 The factor graph library (fglib) is a Python 3 package to simulate message passing on factor graphs.
-It is build upon the Python 3 packages _NetworkX_ and _NumPy_ with the goal to be simple and intuitive.
+The design of fglib is based on the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
 
-The project is in the development phase.
+fglib is build upon the Python packages [NetworkX](https://networkx.github.io/) and [NumPy](http://www.numpy.org/).
 
 Dependencies
 ------------
