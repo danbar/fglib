@@ -316,7 +316,7 @@ class FNode(Node):
         # Initialize with local factor
         msg = self.factor
 
-#TODO:    # Product over incoming messages
+#         # Product over incoming messages
 #         for n in self.neighbors(graph, self, tnode):
 #             msg *= graph[n][self]['object'].get_message(n, self)
 #

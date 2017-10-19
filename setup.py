@@ -2,6 +2,9 @@ from setuptools import setup, find_packages
 
 import fglib
 
+long_description = ("The factor graph library (fglib) is a Python package "
+                    "to simulate message passing on factor graphs.")
+
 setup(
     name="fglib",
     version=fglib.__version__,
@@ -15,7 +18,8 @@ setup(
 
     # Metadata
     author="Daniel Bartel",
-    description="The factor graph library (fglib) is a Python package to simulate message passing on factor graphs.",
+    description="factor graph library",
+    long_description=long_description,
     license="MIT License",
     keywords="factor graph message passing",
     url="https://github.com/danbar/fglib/",
