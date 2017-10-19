@@ -29,10 +29,11 @@ nosetests.xml
 # Translations
 *.mo
 
-# Mr Developer
-.mr.developer.cfg
+# IDE
 .project
 .pydevproject
+.settings
 
-# Operating system
-**/.DS_Store
+# Custom
+fglib-env
+docs/_build
