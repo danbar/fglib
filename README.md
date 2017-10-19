@@ -1,3 +1,5 @@
+[![Build Status](https://www.travis-ci.org/danbar/fglib.svg?branch=master)](https://www.travis-ci.org/danbar/fglib)
+
 ![logo of fglib](https://rawgit.com/danbar/fglib/master/docs/logo.svg)
 
 fglib
