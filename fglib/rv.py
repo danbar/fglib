@@ -9,6 +9,8 @@ Classes:
 
 """
 
+from abc import ABC, abstractmethod, abstractproperty
+
 import numpy as np
 
 
@@ -19,7 +21,68 @@ class ParameterException(Exception):
     pass
 
 
-class Discrete:
+class RandomVariable(ABC):
+
+    """Abstract base class for all random variables."""
+
+    @abstractproperty
+    def dim(self):
+        pass
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __add__(self):
+        pass
+
+    @abstractmethod
+    def __sub__(self):
+        pass
+
+    @abstractmethod
+    def __mul__(self):
+        pass
+
+    @abstractmethod
+    def __iadd__(self):
+        pass
+
+    @abstractmethod
+    def __isub__(self):
+        pass
+
+    @abstractmethod
+    def __imul__(self):
+        pass
+
+    @abstractmethod
+    def __eq__(self):
+        pass
+
+    @abstractmethod
+    def normalize(self):
+        pass
+
+    @abstractmethod
+    def marginalize(self):
+        pass
+
+    @abstractmethod
+    def maximize(self):
+        pass
+
+    @abstractmethod
+    def argmax(self):
+        pass
+
+    @abstractmethod
+    def log(self):
+        pass
+
+
+class Discrete(RandomVariable):
 
     """Class for discrete random variables.
 
@@ -271,7 +334,7 @@ class Discrete:
         return Discrete(np.log(self.value), self.dim)
 
 
-class Gaussian:
+class Gaussian(RandomVariable):
 
     """Class for Gaussian random variables.
 
@@ -440,6 +503,10 @@ class Gaussian:
         return np.allclose(self._W, other._W) \
             and np.allclose(self._Wm, other._Wm) \
             and self.dim == other.dim
+
+    def normalize(self):
+        """Normalize probability density function."""
+        return self
 
     def marginalize(self, *dims):
         """Return the marginal for given dimensions.
