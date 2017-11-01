@@ -11,7 +11,7 @@ Classes:
 from . import nodes
 
 
-class Edge(object):
+class Edge:
 
     """Edge.
 

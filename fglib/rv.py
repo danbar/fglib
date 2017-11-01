@@ -19,7 +19,7 @@ class ParameterException(Exception):
     pass
 
 
-class Discrete(object):
+class Discrete:
 
     """Class for discrete random variables.
 
@@ -271,7 +271,7 @@ class Discrete(object):
         return Discrete(np.log(self.value), self.dim)
 
 
-class Gaussian(object):
+class Gaussian:
 
     """Class for Gaussian random variables.
 
