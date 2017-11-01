@@ -12,7 +12,7 @@ Classes:
 
 """
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty
 from enum import Enum
 from types import MethodType
 
@@ -30,7 +30,7 @@ class NodeType(Enum):
     factor_node = 2
 
 
-class Node(metaclass=ABCMeta):
+class Node(ABC):
 
     """Abstract base class for all nodes."""
 
