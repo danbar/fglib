@@ -33,15 +33,23 @@ from fglib import graphs, nodes, inference, rv
 fg = graphs.FactorGraph()
 
 # Create variable nodes
-x1 = nodes.VNode("x1")
-x2 = nodes.VNode("x2")
-x3 = nodes.VNode("x3")
-x4 = nodes.VNode("x4")
+x1 = nodes.VNode("x1", rv.Discrete)
+x2 = nodes.VNode("x2", rv.Discrete)
+x3 = nodes.VNode("x3", rv.Discrete)
+x4 = nodes.VNode("x4", rv.Discrete)
 
-# Create factor nodes
-fa = nodes.FNode("fa")
-fb = nodes.FNode("fb")
-fc = nodes.FNode("fc")
+# Create factor nodes (with joint distributions)
+dist_fa = [[0.3, 0.4],
+           [0.3, 0.0]]
+fa = nodes.FNode("fa", rv.Discrete(dist_fa, x1, x2))
+
+dist_fb = [[0.3, 0.4],
+           [0.3, 0.0]]
+fb = nodes.FNode("fb", rv.Discrete(dist_fb, x2, x3))
+
+dist_fc = [[0.3, 0.4],
+           [0.3, 0.0]]
+fc = nodes.FNode("fc", rv.Discrete(dist_fc, x2, x4))
 
 # Add nodes to factor graph
 fg.set_nodes([x1, x2, x3, x4])
@@ -54,19 +62,6 @@ fg.set_edge(x2, fb)
 fg.set_edge(fb, x3)
 fg.set_edge(x2, fc)
 fg.set_edge(fc, x4)
-
-# Set joint distributions of factor nodes over variable nodes
-dist_fa = [[0.3, 0.4],
-           [0.3, 0.0]]
-fa.factor = rv.Discrete(dist_fa, x1, x2)
-
-dist_fb = [[0.3, 0.4],
-           [0.3, 0.0]]
-fb.factor = rv.Discrete(dist_fb, x2, x3)
-
-dist_fc = [[0.3, 0.4],
-           [0.3, 0.0]]
-fc.factor = rv.Discrete(dist_fc, x2, x4)
 
 # Perform sum-product algorithm on factor graph
 # and request belief of variable node x4

@@ -4,12 +4,13 @@ This module contains classes for random variables and exceptions.
 
 Classes:
     ParameterException: Exception for invalid parameters.
+    RandomVariable: Abstract class for random variables.
     Discrete: Class for discrete random variables.
     Gaussian: Class for Gaussian random variables.
 
 """
 
-from abc import ABC, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
 
 import numpy as np
 
@@ -24,6 +25,10 @@ class ParameterException(Exception):
 class RandomVariable(ABC):
 
     """Abstract base class for all random variables."""
+
+    @abstractclassmethod
+    def unity(cls, *args):
+        pass
 
     @abstractproperty
     def dim(self):
@@ -122,6 +127,23 @@ class Discrete(RandomVariable):
             raise ParameterException('Dimension mismatch.')
         else:
             self._dim = args
+
+    @classmethod
+    def unity(cls, *args):
+        """Initialize unit element of a discrete random variable.
+
+        Args:
+            *args: Instances of the class VNode representing the variables of
+                the probability mass function. The number of the positional
+                arguments must match the number of dimensions of the Numpy
+                array.
+
+        Raises:
+            ParameterException: An error occurred initializing with invalid
+                parameters.
+
+        """
+        return cls([1], *args)
 
     @property
     def pmf(self):
@@ -387,13 +409,43 @@ class Gaussian(RandomVariable):
             self._dim = args
 
     @classmethod
-    def inf_form(cls, raw_W, raw_Wm, *args):
-        """...
+    def unity(cls, *args):
+        """Initialize unit element of a Gaussian random variable.
 
-        ...
+        Args:
+            *args: Instances of the class VNode representing the variables of
+                the mean vector and covariance matrix, respectively. The number
+                of the positional arguments must match the number of dimensions
+                of the Numpy arrays.
+
+        Raises:
+            ParameterException: An error occurred initializing with invalid
+                parameters.
 
         """
-        g = Gaussian(None, None, *args)
+        return cls([[0]], [[1]], *args)
+
+    @classmethod
+    def inf_form(cls, raw_W, raw_Wm, *args):
+        """Initialize a Gaussian random variable using the information form.
+
+        Create a new Gaussian random variable with the given mean vector and
+        the given covariance matrix over the given variable nodes.
+
+        Args:
+            raw_W: A Numpy array representing the precision matrix.
+            raw_Wm: A Numpy array representing the precision-mean vector.
+            *args: Instances of the class VNode representing the variables of
+                the mean vector and covariance matrix, respectively. The number
+                of the positional arguments must match the number of dimensions
+                of the Numpy arrays.
+
+        Raises:
+            ParameterException: An error occurred initializing with invalid
+                parameters.
+
+        """
+        g = cls(None, None, *args)
         g._W = np.asarray(raw_W, dtype=np.float64)
         g._Wm = np.asarray(raw_Wm, dtype=np.float64)
         return g

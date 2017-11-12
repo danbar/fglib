@@ -32,36 +32,26 @@ from fglib import graphs, nodes, inference, rv
 # Create factor graph
 fg = graphs.FactorGraph()
 
-# Create variable nodes (with initial distributions)
-x1 = nodes.VNode("x1")
-x1.init = rv.Discrete([1, 1], x1) # Discrete random variable with 2 states (Bernoulli random variable)
-
-x2 = nodes.VNode("x2")
-x2.init = rv.Discrete([1, 1, 1], x2) # Discrete random variable with 3 states
-
-x3 = nodes.VNode("x3")
-x3.init = rv.Discrete([1, 1], x3)
-
-x4 = nodes.VNode("x4")
-x4.init = rv.Discrete([1, 1], x4)
+# Create variable nodes
+x1 = nodes.VNode("x1", rv.Discrete) # Discrete random variable with 2 states (Bernoulli random variable)
+x2 = nodes.VNode("x2", rv.Discrete) # Discrete random variable with 3 states
+x3 = nodes.VNode("x3", rv.Discrete)
+x4 = nodes.VNode("x4", rv.Discrete)
 
 # Create factor nodes (with joint distributions)
-fa = nodes.FNode("fa")
 dist_fa = [[0.3, 0.2, 0.1],
            [0.3, 0.0, 0.1]]
-fa.factor = rv.Discrete(dist_fa, x1, x2)
+fa = nodes.FNode("fa", rv.Discrete(dist_fa, x1, x2))
 
-fb = nodes.FNode("fb")
 dist_fb = [[0.3, 0.2],
            [0.3, 0.0],
            [0.1, 0.1]]
-fb.factor = rv.Discrete(dist_fb, x2, x3)
+fb = nodes.FNode("fb", rv.Discrete(dist_fb, x2, x3))
 
-fc = nodes.FNode("fc")
 dist_fc = [[0.3, 0.2],
            [0.3, 0.0],
            [0.1, 0.1]]
-fc.factor = rv.Discrete(dist_fc, x2, x4)
+fc = nodes.FNode("fc", rv.Discrete(dist_fc, x2, x4))
 
 # Add nodes to factor graph
 fg.set_nodes([x1, x2, x3, x4])

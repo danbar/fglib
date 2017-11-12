@@ -103,13 +103,10 @@ class VNode(Node):
 
     """
 
-    def __init__(self, label, init=None, observed=False):
+    def __init__(self, label, rv_type, observed=False):
         """Create a variable node."""
         super().__init__(label)
-        if init is not None:
-            self.init = init
-        else:
-            self.init = rv.Discrete(np.array([1, 1]), self)
+        self.init = rv_type.unity(self)
         self.observed = observed
 
     @property
