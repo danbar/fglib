@@ -160,7 +160,7 @@ def ForneyFactorGraph(FactorGraph):
     # TODO: Needs to be implemented!
 
 
-def convert_graph_to_factor_graph(graph, vnode, fnode):
+def convert_graph_to_factor_graph(graph, vnode, fnode, rv_type):
     """Convert bipartite graph to factor graph.
 
     Convert a bipartite graph from the NetworkX library to a factor graph.
@@ -173,6 +173,7 @@ def convert_graph_to_factor_graph(graph, vnode, fnode):
         graph: Bipartite graph used for conversion.
         vnode: Variable node class.
         fnode: Factor node class.
+        rv_type: Type of random variable for variable nodes.
 
     Returns:
         A factor graph.
@@ -186,7 +187,7 @@ def convert_graph_to_factor_graph(graph, vnode, fnode):
 
     # Insert variable nodes into mapping
     vn = [n for (n, d) in graph.nodes(data=True) if d['bipartite'] == 0]
-    vn_instances = [vnode(label) for _, label in enumerate(vn)]
+    vn_instances = [vnode(label, rv_type) for _, label in enumerate(vn)]
     mapping.update((n, vn_instances.pop()) for n in vn)
 
     # Insert factor nodes into mapping

@@ -13,15 +13,23 @@ class TestInference(unittest.TestCase):
         self.fg = graphs.FactorGraph()
 
         # Create variable nodes
-        self.x1 = nodes.VNode("x1")
-        self.x2 = nodes.VNode("x2")
-        self.x3 = nodes.VNode("x3")
-        self.x4 = nodes.VNode("x4")
+        self.x1 = nodes.VNode("x1", rv.Discrete)
+        self.x2 = nodes.VNode("x2", rv.Discrete)
+        self.x3 = nodes.VNode("x3", rv.Discrete)
+        self.x4 = nodes.VNode("x4", rv.Discrete)
 
-        # Create factor nodes
-        self.fa = nodes.FNode("fa")
-        self.fb = nodes.FNode("fb")
-        self.fc = nodes.FNode("fc")
+        # Create factor nodes (with joint distributions)
+        dist_fa = [[0.3, 0.4],
+                   [0.3, 0.0]]
+        self.fa = nodes.FNode("fa", rv.Discrete(dist_fa, self.x1, self.x2))
+
+        dist_fb = [[0.3, 0.4],
+                   [0.3, 0.0]]
+        self.fb = nodes.FNode("fb", rv.Discrete(dist_fb, self.x2, self.x3))
+
+        dist_fc = [[0.3, 0.4],
+                   [0.3, 0.0]]
+        self.fc = nodes.FNode("fc", rv.Discrete(dist_fc, self.x2, self.x4))
 
         # Add nodes to factor graph
         self.fg.set_nodes([self.x1, self.x2, self.x3, self.x4])
@@ -34,19 +42,6 @@ class TestInference(unittest.TestCase):
         self.fg.set_edge(self.fb, self.x3)
         self.fg.set_edge(self.x2, self.fc)
         self.fg.set_edge(self.fc, self.x4)
-
-        # Set joint distributions of factor nodes over variable nodes
-        dist_fa = [[0.3, 0.4],
-                   [0.3, 0.0]]
-        self.fa.factor = rv.Discrete(dist_fa, self.x1, self.x2)
-
-        dist_fb = [[0.3, 0.4],
-                   [0.3, 0.0]]
-        self.fb.factor = rv.Discrete(dist_fb, self.x2, self.x3)
-
-        dist_fc = [[0.3, 0.4],
-                   [0.3, 0.0]]
-        self.fc.factor = rv.Discrete(dist_fc, self.x2, self.x4)
 
     def test_spa(self):
         inference.sum_product(self.fg, query_node=self.x1)

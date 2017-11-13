@@ -3,7 +3,7 @@ import unittest
 import networkx as nx
 from networkx.algorithms import bipartite
 
-from .. import graphs, nodes
+from .. import graphs, nodes, rv
 
 
 class TestFactorGraph(unittest.TestCase):
@@ -20,7 +20,8 @@ class TestFactorGraph(unittest.TestCase):
                           ('x2', 'fc'), ('fc', 'x4')])
         bottom_nodes, top_nodes = bipartite.sets(g, variable_nodes)
 
-        fg = graphs.convert_graph_to_factor_graph(g, nodes.VNode, nodes.FNode)
+        fg = graphs.convert_graph_to_factor_graph(g, nodes.VNode, nodes.FNode,
+                                                  rv.Discrete)
         vn = {str(n) for n in fg.get_vnodes()}
         fn = {str(n) for n in fg.get_fnodes()}
 

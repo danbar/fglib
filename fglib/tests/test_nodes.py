@@ -9,18 +9,18 @@ from .. import graphs, nodes, rv
 class TestVariableNode(unittest.TestCase):
 
     def test_label(self):
-        n = nodes.VNode("My Variable Node")
+        n = nodes.VNode("My Variable Node", rv.Gaussian)
         self.assertEqual(str(n), "My Variable Node")
 
     def test_type(self):
-        n = nodes.VNode("Variable Node")
+        n = nodes.VNode("Variable Node", rv.Discrete)
         self.assertEqual(n.type, nodes.NodeType.variable_node)
 
     def test_neighbors(self):
         fg = graphs.FactorGraph()
-        n0 = nodes.VNode(0)
-        n1 = nodes.VNode(1)
-        n2 = nodes.VNode(2)
+        n0 = nodes.VNode(0, rv.Discrete)
+        n1 = nodes.VNode(1, rv.Discrete)
+        n2 = nodes.VNode(2, rv.Discrete)
         fg.set_nodes([n0, n1, n2])
         fg.set_edges([(n0, n1), (n1, n2)])
 
@@ -43,7 +43,7 @@ class TestVariableNode(unittest.TestCase):
     def test_spa(self):
         fg = graphs.FactorGraph()
         n0 = nodes.FNode(0)
-        n1 = nodes.VNode(1)
+        n1 = nodes.VNode(1, rv.Discrete)
         n2 = nodes.FNode(2)
         fg.set_nodes([n0, n1, n2])
         fg.set_edges([(n0, n1), (n1, n2)])
@@ -57,7 +57,7 @@ class TestVariableNode(unittest.TestCase):
         npt.assert_almost_equal(msg_out.pmf, msg_in.pmf)
         self.assertEqual(msg_out.dim, (n1,))
 
-        n3 = nodes.VNode(3)
+        n3 = nodes.VNode(3, rv.Discrete)
         fg.set_node(n3)
         fg.set_edge(n3, n1)
 
@@ -121,8 +121,8 @@ class TestFactorNode(unittest.TestCase):
 
     def test_spa(self):
         fg = graphs.FactorGraph()
-        n0 = nodes.VNode(0)
-        n2 = nodes.VNode(2)
+        n0 = nodes.VNode(0, rv.Discrete)
+        n2 = nodes.VNode(2, rv.Discrete)
         rv1 = rv.Discrete(np.array([[0.3, 0.4],
                                     [0.3, 0.0]]), n0, n2)
         n1 = nodes.FNode(1, rv1)

@@ -9,8 +9,8 @@ from .. import nodes, rv
 class TestDiscrete(unittest.TestCase):
 
     def setUp(self):
-        self.x1 = nodes.VNode("x1")
-        self.x2 = nodes.VNode("x2")
+        self.x1 = nodes.VNode("x1", rv.Discrete)
+        self.x2 = nodes.VNode("x2", rv.Discrete)
 
         self.rv1 = rv.Discrete([0.6, 0.4], self.x1)
         self.rv2 = rv.Discrete([0.2, 0.8], self.x2)
@@ -23,7 +23,7 @@ class TestDiscrete(unittest.TestCase):
 
     def test_initialization(self):
         with self.assertRaises(rv.ParameterException):
-            x = nodes.VNode("x")
+            x = nodes.VNode("x", rv.Discrete)
             rv.Discrete([[0.1, 0.2]], x)
 
     @unittest.skip("Test case is not implemented.")
@@ -134,8 +134,8 @@ class TestDiscrete(unittest.TestCase):
 class TestGaussian(unittest.TestCase):
 
     def setUp(self):
-        self.x1 = nodes.VNode("x1")
-        self.x2 = nodes.VNode("x2")
+        self.x1 = nodes.VNode("x1", rv.Gaussian)
+        self.x2 = nodes.VNode("x2", rv.Gaussian)
 
         self.rv1 = rv.Gaussian([[1]], [[2]], self.x1)
         self.rv2 = rv.Gaussian([[3]], [[4]], self.x1)
