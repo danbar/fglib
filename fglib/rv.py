@@ -143,7 +143,8 @@ class Discrete(RandomVariable):
                 parameters.
 
         """
-        return cls([1], *args)
+        n = len(args)
+        return cls(np.ones((1,) * n), *args)
 
     @property
     def pmf(self):
@@ -423,7 +424,8 @@ class Gaussian(RandomVariable):
                 parameters.
 
         """
-        return cls([[0]], [[1]], *args)
+        n = len(args)
+        return cls(np.diag(np.zeros(n)), np.diag(np.ones(n) * np.Inf), *args)
 
     @classmethod
     def inf_form(cls, raw_W, raw_Wm, *args):

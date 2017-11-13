@@ -91,10 +91,16 @@ class TestDiscrete(unittest.TestCase):
         self.assertEqual(mul.dim, (self.x1, self.x2))
 
     def test_unit_element_1D(self):
+        rv0 = rv.Discrete.unity(self.x1)
+        self.assertEqual(self.rv1 * rv0, self.rv1)
+
         rv0 = rv.Discrete([1, 1], self.x1)
         self.assertEqual(self.rv1 * rv0, self.rv1)
 
     def test_unit_element_2D(self):
+        rv0 = rv.Discrete.unity(self.x1, self.x2)
+        self.assertEqual(self.rv3 * rv0, self.rv3)
+
         rv0 = rv.Discrete([[1, 1],
                            [1, 1]], self.x1, self.x2)
         self.assertEqual(self.rv3 * rv0, self.rv3)
@@ -185,10 +191,16 @@ class TestGaussian(unittest.TestCase):
         self.assertEqual(mul, res)
 
     def test_unit_element_1D(self):
+        rv0 = rv.Gaussian.unity(self.x1)
+        self.assertEqual(self.rv1 * rv0, self.rv1)
+
         rv0 = rv.Gaussian([[0]], [[np.Inf]], self.x1)
         self.assertEqual(self.rv1 * rv0, self.rv1)
 
     def test_unit_element_2D(self):
+        rv0 = rv.Gaussian.unity(self.x1, self.x2)
+        self.assertEqual(self.rv3 * rv0, self.rv3)
+
         rv0 = rv.Gaussian([[0], [0]],
                           [[np.Inf, 0], [0, np.Inf]],
                           self.x1, self.x2)
