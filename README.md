@@ -6,14 +6,21 @@ fglib
 =====
 
 The factor graph library (fglib) is a Python package to simulate message passing on factor graphs.
-The design of fglib is based on the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle).
+It supports the
 
-fglib is build upon the Python packages [NetworkX](https://networkx.github.io/) and [NumPy](http://www.numpy.org/).
+* sum-product algorithm (belief propagation)
+* max-product algorithm
+* max-sum algorithm
+* mean-field algorithm
+
+on discrete and Gaussian random variables.
+
+This Python package is build upon the Python packages [NetworkX](https://networkx.github.io/) and [NumPy](http://www.numpy.org/).
 
 Dependencies
 ------------
 
-The following dependencies are required to run fglib.
+The following dependencies are required to run fglib:
 
 * _Python_ 3.4 or later
 * _NetworkX_ 2.0 or later
@@ -36,12 +43,10 @@ Example
 -------
 
 ```Python
+"""A simple example of the sum-product algorithm
 
-"""A simple example
-
-This simple example of the sum-product algorithm on a factor graph
-with Bernoulli random variables is taken from page 409 of the book
-C. M. Bishop, Pattern Recognition and Machine Learning. Springer, 2006.
+This is a simple example of the sum-product algorithm on a factor graph
+with Discrete random variables.
 
       /--\      +----+      /--\      +----+      /--\
      | x1 |-----| fa |-----| x2 |-----| fb |-----| x3 |
@@ -57,10 +62,11 @@ C. M. Bishop, Pattern Recognition and Machine Learning. Springer, 2006.
 
 The following joint distributions are used for the factor nodes.
 
-     fa   | x2=0 x2=1     fb   | x3=0 x3=1     fc   | x4=0 x4=1
-     ----------------     ----------------     ----------------
-     x1=0 | 0.3  0.4      x2=0 | 0.3  0.4      x2=0 | 0.3  0.4
-     x1=1 | 0.3  0.0      x2=1 | 0.3  0.0      x2=1 | 0.3  0.0
+     fa   | x2=0 x2=1 x2=2     fb   | x3=0 x3=1     fc   | x4=0 x4=1
+     ---------------------     ----------------     ----------------
+     x1=0 | 0.3  0.2  0.1      x2=0 | 0.3  0.2      x2=0 | 0.3  0.2
+     x1=1 | 0.3  0.0  0.1      x2=1 | 0.3  0.0      x2=1 | 0.3  0.0
+                               x2=2 | 0.1  0.1      x2=2 | 0.1  0.1
 
 """
 
@@ -70,15 +76,25 @@ from fglib import graphs, nodes, inference, rv
 fg = graphs.FactorGraph()
 
 # Create variable nodes
-x1 = nodes.VNode("x1")
-x2 = nodes.VNode("x2")
-x3 = nodes.VNode("x3")
-x4 = nodes.VNode("x4")
+x1 = nodes.VNode("x1", rv.Discrete)  # with 2 states (Bernoulli)
+x2 = nodes.VNode("x2", rv.Discrete)  # with 3 states
+x3 = nodes.VNode("x3", rv.Discrete)
+x4 = nodes.VNode("x4", rv.Discrete)
 
-# Create factor nodes
-fa = nodes.FNode("fa")
-fb = nodes.FNode("fb")
-fc = nodes.FNode("fc")
+# Create factor nodes (with joint distributions)
+dist_fa = [[0.3, 0.2, 0.1],
+           [0.3, 0.0, 0.1]]
+fa = nodes.FNode("fa", rv.Discrete(dist_fa, x1, x2))
+
+dist_fb = [[0.3, 0.2],
+           [0.3, 0.0],
+           [0.1, 0.1]]
+fb = nodes.FNode("fb", rv.Discrete(dist_fb, x2, x3))
+
+dist_fc = [[0.3, 0.2],
+           [0.3, 0.0],
+           [0.1, 0.1]]
+fc = nodes.FNode("fc", rv.Discrete(dist_fc, x2, x4))
 
 # Add nodes to factor graph
 fg.set_nodes([x1, x2, x3, x4])
@@ -92,27 +108,13 @@ fg.set_edge(fb, x3)
 fg.set_edge(x2, fc)
 fg.set_edge(fc, x4)
 
-# Set joint distributions of factor nodes over variable nodes
-dist_fa = [[0.3, 0.4],
-           [0.3, 0.0]]
-fa.factor = rv.Discrete(dist_fa, x1, x2)
-
-dist_fb = [[0.3, 0.4],
-           [0.3, 0.0]]
-fb.factor = rv.Discrete(dist_fb, x2, x3)
-
-dist_fc = [[0.3, 0.4],
-           [0.3, 0.0]]
-fc.factor = rv.Discrete(dist_fc, x2, x4)
-
 # Perform sum-product algorithm on factor graph
-# and request belief of variable node x3
-belief = inference.sum_product(fg, x3)
+# and request belief of variable node x4
+belief = inference.sum_product(fg, x4)
 
-# Print belief of variable node x3
-print("Belief of variable node x3:")
+# Print belief of variables
+print("Belief of variable node x4:")
 print(belief)
-
 ```
 
 References

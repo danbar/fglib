@@ -1,0 +1,10 @@
+fglib v0.2
+----------
+* Improve interface of variable nodes
+* Change dependencies to Python 3.4, NetworkX 2.0, NumPy 1.12, and matplotlib 2.0
+* Support for unnormalized probability mass functions
+* Several bugfixes and improvements
+
+fglib v0.1
+----------
+* Initial version
