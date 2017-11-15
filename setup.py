@@ -18,11 +18,13 @@ setup(
 
     # Metadata
     author="Daniel Bartel",
+    author_email = 'dan.bar@gmx.at',
     description="factor graph library",
     long_description=long_description,
     license="MIT License",
     keywords="factor graph message passing",
     url="https://github.com/danbar/fglib/",
+    download_url = 'https://github.com/danbar/fglib/archive/v0.2.1.tar.gz',
 
     # Miscellaneous
     test_suite="nose.collector"
