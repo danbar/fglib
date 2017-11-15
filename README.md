@@ -2,8 +2,7 @@
 
 ![logo of fglib](https://rawgit.com/danbar/fglib/master/docs/logo.svg)
 
-fglib
-=====
+# fglib
 
 The factor graph library (fglib) is a Python package to simulate message passing on factor graphs.
 It supports the
@@ -13,12 +12,11 @@ It supports the
 * max-sum algorithm
 * mean-field algorithm
 
-on discrete and Gaussian random variables.
+with discrete and Gaussian random variables.
 
 This Python package is build upon the Python packages [NetworkX](https://networkx.github.io/) and [NumPy](http://www.numpy.org/).
 
-Dependencies
-------------
+## Dependencies
 
 The following dependencies are required to run fglib:
 
@@ -29,8 +27,7 @@ The following dependencies are required to run fglib:
 
 In addition, the Python package _setuptools_ is required to install fglib.
 
-Documentation
--------------
+## Documentation
 
 In order to generate the documentation site for the factor graph library, execute the following commands from the top-level directory.
 
@@ -39,8 +36,7 @@ $ cd docs/
 $ make html
 ```
 
-Example
--------
+## Example
 
 ```Python
 """A simple example of the sum-product algorithm
@@ -117,8 +113,7 @@ print("Belief of variable node x4:")
 print(belief)
 ```
 
-References
-----------
+## References
 
 * H.-A. Loeliger, “An introduction to factor graphs,” 
 _IEEE Signal Process. Mag._, vol. 21, no. 1, pp. 28–41, Jan. 2004.
