@@ -1,6 +1,7 @@
 """fglib -- Factor Graph Library.
 
-Python package for factor graphs built upon NetworkX.
+The factor graph library (fglib) is a Python package
+to simulate message passing on factor graphs.
 
 Modules:
     inference: Module for inference algorithms.
@@ -12,5 +13,5 @@ Modules:
 
 """
 
-__all__ = ["graphs", "inference", "nodes", "rv", "utils"]
+__all__ = ["inference", "graphs", "nodes", "edges", "rv", "utils"]
 __version__ = "0.2.2"
