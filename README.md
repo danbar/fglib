@@ -14,18 +14,26 @@ It supports the
 
 with discrete and Gaussian random variables.
 
-This Python package is build upon the Python packages [NetworkX](https://networkx.github.io/) and [NumPy](http://www.numpy.org/).
+## Installation
+
+Install fglib with [the Python Package Index](https://pypi.python.org/pypi) by using
+
+```
+pip install fglib
+```
+
+Install fglib with [setuptools](https://pypi.python.org/pypi/setuptools) by using
+
+```
+python setup.py install
+```
 
 ## Dependencies
 
-The following dependencies are required to run fglib:
-
-* _Python_ 3.4 or later
-* _NetworkX_ 2.0 or later
-* _NumPy_ 1.12 or later
-* _matplotlib_ 2.0 or later
-
-In addition, the Python package _setuptools_ is required to install fglib.
+* [Python](https://www.python.org/) 3.4 or later
+* [NetworkX](https://networkx.github.io/) 2.0 or later
+* [NumPy](http://www.numpy.org/) 1.12 or later
+* [matplotlib](https://matplotlib.org/) 2.0 or later
 
 ## Documentation
 
@@ -37,6 +45,8 @@ $ make html
 ```
 
 ## Example
+
+Examples (like the following one) are located in `examples/` directory.
 
 ```Python
 """A simple example of the sum-product algorithm
