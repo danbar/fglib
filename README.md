@@ -46,7 +46,7 @@ $ make html
 
 ## Example
 
-Examples (like the following one) are located in `examples/` directory.
+Examples (like the following one) are located in the `examples/` directory.
 
 ```Python
 """A simple example of the sum-product algorithm
