@@ -1,0 +1,7 @@
+# .coveragerc to control coverage.py
+[run]
+source =
+    fglib
+[report]
+omit =
+    */tests/*
