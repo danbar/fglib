@@ -129,9 +129,45 @@ class TestInference(unittest.TestCase):
         res /= np.sum([0.036, 0.048])
         npt.assert_almost_equal(maximum, res)
 
-    @unittest.skip("Test case is not implemented.")
+    @unittest.skip("Max-sum algorithm is not working at the moment.")
     def test_msa(self):
-        pass
+        inference.max_sum(self.fg, query_node=self.x1)
+
+        # Test maximum of variable node x1
+        maximum = self.x1.maximum(normalize=False)
+        res = -3.036
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        maximum = self.x1.maximum()
+        res = -3.036 / np.sum([-3.036, -3.036])
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        # Test maximum of variable node x2
+        maximum = self.x2.maximum(normalize=False)
+        res = -3.036
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        maximum = self.x2.maximum()
+        res /= np.sum([-3.036, -3.036])
+        npt.assert_almost_equal(maximum, res)
+
+        # Test maximum of variable node x3
+        maximum = self.x3.maximum(normalize=False)
+        res = -3.036
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        maximum = self.x3.maximum()
+        res = -3.324 / np.sum([-3.324, -3.036])
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        # Test maximum of variable node x4
+        maximum = self.x4.maximum(normalize=False)
+        res = -3.036
+        npt.assert_almost_equal(maximum, res, decimal=3)
+
+        maximum = self.x4.maximum()
+        res = -3.324 / np.sum([-3.324, -3.036])
+        npt.assert_almost_equal(maximum, res, decimal=3)
 
 
 class TestExample(unittest.TestCase):

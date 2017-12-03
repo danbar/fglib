@@ -168,9 +168,15 @@ class Discrete(RandomVariable):
             A new discrete random variable representing the summation.
 
         """
-        pmf = np.convolve(self.pmf, other.pmf, 'same')
+        # Verify dimensions of summand and summand.
+        if len(self.dim) < len(other.dim):
+            self._expand(other.dim, other.pmf.shape)
+        elif len(self.dim) > len(other.dim):
+            other._expand(self.dim, self.pmf.shape)
 
-        return Discrete(pmf, self.dim)
+        pmf = self.pmf + other.pmf
+
+        return Discrete(pmf, *self.dim)
 
     def __sub__(self, other):
         """Subtract other from self and return the result.
@@ -182,9 +188,15 @@ class Discrete(RandomVariable):
             A new discrete random variable representing the subtraction.
 
         """
-        pmf = np.convolve(self.pmf[::-1], other.pmf, 'same')
+        # Verify dimensions of minuend and subtrahend.
+        if len(self.dim) < len(other.dim):
+            self._expand(other.dim, other.pmf.shape)
+        elif len(self.dim) > len(other.dim):
+            other._expand(self.dim, self.pmf.shape)
 
-        return Discrete(pmf, self.dim)
+        pmf = self.pmf - other.pmf
+
+        return Discrete(pmf, *self.dim)
 
     def __mul__(self, other):
         """Multiply other with self and return the result.
@@ -354,7 +366,7 @@ class Discrete(RandomVariable):
             probablitiy mass function.
 
         """
-        return Discrete(np.log(self.value), self.dim)
+        return Discrete(np.log(self.pmf), *self.dim)
 
 
 class Gaussian(RandomVariable):

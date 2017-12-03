@@ -181,14 +181,13 @@ class VNode(Node):
     def msa(self, tnode):
         """Return message of the max-sum algorithm."""
         if self.observed:
-            return self.init
+            return self.init.log()
         else:
-            # Initial message
-            msg = self.init
-            msg = msg.log()
+            # Initial (logarithmized) message
+            msg = self.init.log()
 
             # Sum over incoming messages
-            for n in self.neighbors(self.graph, self, tnode):
+            for n in self.neighbors(tnode):
                 msg += self.graph[n][self]['object'].get_message(n, self)
 
             return msg
@@ -294,17 +293,17 @@ class FNode(Node):
         """Return message of the max-sum algorithm."""
         self.record[tnode] = {}
 
-        # Initialize with logarithm of local factor
+        # Initialize with (logarithmized) local factor
         msg = self.factor.log()
 
         # Sum over incoming messages
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             msg += self.graph[n][self]['object'].get_message(n, self)
 
         # Maximization over incoming variables
-        for n in self.neighbors(self.graph, self, tnode):
+        for n in self.neighbors(tnode):
             self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
-            msg = msg.max(n)
+            msg = msg.maximize(n, normalize=False)
 
         return msg
 
