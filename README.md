@@ -126,18 +126,21 @@ print(belief)
 
 ## References
 
-* H.-A. Loeliger, “An introduction to factor graphs,” 
+1. B. J. Frey, F. R. Kschischang, H.-A. Loeliger, and N. Wiberg, "Factor graphs and algorithms,"
+in _Proc. 35th Allerton Conf. Communications, Control, and Computing_, Monticello, IL, Sep. 29-Oct. 1, 1997, pp. 666-680.
+
+2. F. R. Kschischang, B. J. Frey, and H.-A. Loeliger, “Factor graphs and the sum-product algorithm,” 
+_IEEE Trans. Inform. Theory_, vol. 47, no. 2, pp. 498–519, Feb. 2001.
+
+3. H.-A. Loeliger, “An introduction to factor graphs,” 
 _IEEE Signal Process. Mag._, vol. 21, no. 1, pp. 28–41, Jan. 2004.
 
-* F. R. Kschischang, B. J. Frey, and H.-A. Loeliger, “Factor graphs and the sum-product algorithm,” 
-_IEEE Trans. Inf. Theory_, vol. 47, no. 2, pp. 498–519, Feb. 2001.
-
-* H.-A. Loeliger, J. Dauwels, H. Junli, S. Korl, P. Li, and F. R. Kschischang, “The factor graph approach to model-based signal processing,” 
+4. H.-A. Loeliger, J. Dauwels, H. Junli, S. Korl, P. Li, and F. R. Kschischang, “The factor graph approach to model-based signal processing,” 
 _Proc. IEEE_, vol. 95, no. 6, pp. 1295–1322, Jun. 2007.
 
-* H. Wymeersch, _Iterative Receiver Design_.
+5. H. Wymeersch, _Iterative Receiver Design_.
 Cambridge, UK: Cambridge University Press, 2007.
 
-* C. M. Bishop, _Pattern Recognition and Machine Learning_, 
+6. C. M. Bishop, _Pattern Recognition and Machine Learning_, 
 8th ed., ser. Information Science and Statistics.
 New York, USA: Springer Science+Business Media, 2009.
