@@ -135,8 +135,12 @@ class VNode(Node):
 
         # Product over all incoming messages
         belief = self.graph[n][self]['object'].get_message(n, self)
-        for n in iterator:
-            belief *= self.graph[n][self]['object'].get_message(n, self)
+        if not self.graph[n][self]['object'].logarithmic:
+            for n in iterator:
+                belief *= self.graph[n][self]['object'].get_message(n, self)
+        else:
+            for n in iterator:
+                belief += self.graph[n][self]['object'].get_message(n, self)
 
         if normalize:
             belief = belief.normalize()

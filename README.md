@@ -10,7 +10,7 @@ It supports the
 
 * sum-product algorithm (belief propagation)
 * max-product algorithm
-* max-sum algorithm - _in development_
+* max-sum algorithm
 * mean-field algorithm - _in development_
 
 with discrete and Gaussian random variables.

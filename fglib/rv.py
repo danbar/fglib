@@ -289,7 +289,7 @@ class Discrete(RandomVariable):
 
     def normalize(self):
         """Normalize probability mass function."""
-        pmf = self.pmf / np.sum(self.pmf)
+        pmf = self.pmf / np.abs(np.sum(self.pmf))
         return Discrete(pmf, *self.dim)
 
     def marginalize(self, *dims, normalize=True):

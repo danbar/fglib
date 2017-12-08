@@ -30,6 +30,8 @@ class Edge:
         self.message = [[None, init],
                         [init, None]]
 
+        self.logarithmic = False
+
         # Variable node
         if snode.type == nodes.NodeType.variable_node:
             self.variable = snode
@@ -40,9 +42,10 @@ class Edge:
         """Return string representation."""
         return str(self.message)
 
-    def set_message(self, snode, tnode, value):
+    def set_message(self, snode, tnode, value, logarithmic=False):
         """Set value of message from source node to target node."""
         self.message[self.index[snode]][self.index[tnode]] = value
+        self.logarithmic = logarithmic
 
     def get_message(self, snode, tnode):
         """Return value of message from source node to target node."""

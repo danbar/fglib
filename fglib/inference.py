@@ -129,12 +129,12 @@ def max_sum(graph, query_node=None):
     # Messages in forward phase
     for (v, u) in forward_path:  # Edge direction: u -> v
         msg = u.msa(v)
-        graph[u][v]['object'].set_message(u, v, msg)
+        graph[u][v]['object'].set_message(u, v, msg, logarithmic=True)
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
         msg = u.msa(v)
-        graph[u][v]['object'].set_message(u, v, msg)
+        graph[u][v]['object'].set_message(u, v, msg, logarithmic=True)
 
     # Maximum argument for query node
     track[query_node] = query_node.argmax()
