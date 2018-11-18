@@ -28,17 +28,17 @@ class FactorGraph(nx.Graph):
 
     The factor graph representing the factorization is given as
 
-      /--\      +----+      /--\      +----+      /--\
+     //--\\     +----+     //--\\     +----+     //--\\
      | x1 |-----| fa |-----| x2 |-----| fb |-----| x3 |
-      \--/      +----+      \--/      +----+      \--/
+     \\--//     +----+     \\--//     +----+     \\--//
                              |
                            +----+
                            | fc |
                            +----+
                              |
-                            /--\
+                           //--\\
                            | x4 |
-                            \--/.
+                           \\--//
 
     The class for factor graphs is inherited from the base class
     for undirected graphs (of the NetworkX library).
