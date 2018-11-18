@@ -1,5 +1,6 @@
 [![Build Status](https://www.travis-ci.org/danbar/fglib.svg?branch=master)](https://www.travis-ci.org/danbar/fglib)
 [![Coverage Status](https://coveralls.io/repos/github/danbar/fglib/badge.svg?branch=master)](https://coveralls.io/github/danbar/fglib?branch=master)
+[![PyPI version](https://badge.fury.io/py/fglib.svg)](https://badge.fury.io/py/fglib)
 
 ![logo of fglib](https://rawgit.com/danbar/fglib/master/docs/logo.svg)
 
