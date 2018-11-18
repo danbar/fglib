@@ -25,7 +25,6 @@ setup(
     license="MIT License",
     keywords="factor graph message passing",
     url="https://github.com/danbar/fglib/",
-    download_url='https://github.com/danbar/fglib/archive/v0.2.1.tar.gz',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering',
