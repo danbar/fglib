@@ -26,6 +26,13 @@ class TestDiscrete(unittest.TestCase):
             x = nodes.VNode("x", rv.Discrete)
             rv.Discrete([[0.1, 0.2]], x)
 
+    def test_string(self):
+        s = str(self.rv1)
+        self.assertEqual(s, '[ 0.6, 0.4]')
+
+        s = str(self.rv3)
+        self.assertEqual(s, '[[ 0.1, 0.2],\n [ 0.3, 0.4]]')
+
     @unittest.skip("Test case is not implemented.")
     def test_addition(self):
         # ToDo: ...
@@ -162,6 +169,13 @@ class TestGaussian(unittest.TestCase):
                                    np.dot(np.linalg.inv(cov), mean),
                                    self.x1, self.x2)
         self.assertEqual(self.rv3, tmp)
+
+    def test_string(self):
+        s = str(self.rv1)
+        self.assertEqual(s, '[[ 1.]]\n[[ 2.]]')
+
+        s = str(self.rv3)
+        self.assertEqual(s, '[[ 1.],\n [ 2.]]\n[[ 3., 4.],\n [ 5., 6.]]')
 
     def test_addition_1D_1(self):
         add = self.rv1 + self.rv2
