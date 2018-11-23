@@ -28,63 +28,63 @@ class RandomVariable(ABC):
 
     @abstractclassmethod
     def unity(cls, *args):
-        pass
+        """Initialize unit element of the random variable."""
 
     @abstractproperty
     def dim(self):
-        pass
+        """Dimension of the random variable."""
 
     @abstractmethod
     def __str__(self):
-        pass
+        """String representation of the random variable."""
 
     @abstractmethod
     def __add__(self):
-        pass
+        """Addition of two random variables."""
 
     @abstractmethod
     def __sub__(self):
-        pass
+        """Subtraction of two random variables."""
 
     @abstractmethod
     def __mul__(self):
-        pass
+        """Multiplication of two random variables."""
 
     @abstractmethod
     def __iadd__(self):
-        pass
+        """Augmented addition of two random variables."""
 
     @abstractmethod
     def __isub__(self):
-        pass
+        """Augmented subtraction of two random variables."""
 
     @abstractmethod
     def __imul__(self):
-        pass
+        """Augmented multiplication of two random variables."""
 
     @abstractmethod
     def __eq__(self):
-        pass
+        """Compare two random variables for equality."""
 
     @abstractmethod
     def normalize(self):
-        pass
+        """Normalize the random variable."""
 
     @abstractmethod
     def marginalize(self):
-        pass
+        """Return marginal of the random variable."""
 
     @abstractmethod
     def maximize(self):
-        pass
+        """Return maximum of the random variable."""
 
     @abstractmethod
     def argmax(self):
-        pass
+        """Return dimension of the maximum of the random variable."""
 
     @abstractmethod
     def log(self):
-        pass
+        """Return natural logarithm of the random variable."""
 
 
 class Discrete(RandomVariable):
