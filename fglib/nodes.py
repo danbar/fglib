@@ -43,7 +43,7 @@ class Node(ABC):
 
     @abstractproperty
     def type(self):
-        pass
+        """Specify the NodeType."""
 
     @property
     def graph(self):
@@ -77,19 +77,19 @@ class Node(ABC):
 
     @abstractmethod
     def spa(self, tnode):
-        pass
+        """Return message of the sum-product algorithm."""
 
     @abstractmethod
     def mpa(self, tnode):
-        pass
+        """Return message of the max-product algorithm."""
 
     @abstractmethod
     def msa(self, tnode):
-        pass
+        """Return message of the max-sum algorithm."""
 
     @abstractmethod
     def mf(self, tnode):
-        pass
+        """Return message of the mean-field algorithm."""
 
 
 class VNode(Node):
