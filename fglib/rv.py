@@ -156,7 +156,7 @@ class Discrete(RandomVariable):
 
     def __str__(self):
         """Return string representation of the discrete random variable."""
-        return str(self.pmf)
+        return np.array2string(self.pmf, separator=',')
 
     def __add__(self, other):
         """Add other to self and return the result.
@@ -478,7 +478,9 @@ class Gaussian(RandomVariable):
 
     def __str__(self):
         """Return string representation of the Gaussian random variable."""
-        return "%s %s" % (self.mean, self.cov)
+        mean = np.array2string(self.mean, separator=',')
+        cov = np.array2string(self.cov, separator=',')
+        return "%s\n%s" % (mean, cov)
 
     def __add__(self, other):
         """Add other to self and return the result.
