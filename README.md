@@ -34,7 +34,7 @@ python setup.py install
 
 * [Python](https://www.python.org/) 3.4 or later
 * [NetworkX](https://networkx.github.io/) 2.0 or later
-* [NumPy](http://www.numpy.org/) 1.12 or later
+* [NumPy](http://www.numpy.org/) 1.14 or later
 * [matplotlib](https://matplotlib.org/) 2.0 or later
 
 ## Documentation
