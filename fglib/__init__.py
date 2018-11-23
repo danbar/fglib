@@ -14,4 +14,4 @@ Modules:
 """
 
 __all__ = ["inference", "graphs", "nodes", "edges", "rv", "utils"]
-__version__ = "0.2.3"
+__version__ = "0.2.4"
