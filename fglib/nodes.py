@@ -19,8 +19,6 @@ from types import MethodType
 import networkx as nx
 import numpy as np
 
-from . import rv
-
 
 class NodeType(Enum):
 
