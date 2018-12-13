@@ -50,23 +50,30 @@ class FactorGraph(nx.Graph):
         super().__init__(self, name="Factor Graph")
 
     def set_node(self, node):
-        """Add a single node to the factor graph.
-
-        A single node is added to the factor graph.
-        Optional attributes can be added to the single node by using keyword
-        arguments.
+        """Set a single node to the factor graph.
 
         Args:
             node: A single node
 
         """
-        node.graph = self
-        self.add_node(node, type=node.type)
+        node.graph = self  # TODO: Can we get rid of this?
+        self.add_node(node, label=node.label, type=node.type)
+
+    def get_node(self, label):
+        """ Get a single node from the factor graph.
+
+        Args:
+            label: Label of a single node
+
+        Returns:
+            A single node.
+
+        """
+        return [n for (n, d) in self.nodes(data=True)
+                if d['label'] == label]
 
     def set_nodes(self, nodes):
-        """Add multiple nodes to the factor graph.
-
-        Multiple nodes are added to the factor graph.
+        """Set multiple nodes to the factor graph.
 
         Args:
             nodes: A list of multiple nodes
@@ -75,8 +82,37 @@ class FactorGraph(nx.Graph):
         for n in nodes:
             self.set_node(n)
 
+    def get_nodes(self):
+        """ Get multiple nodes from the factor graph.
+
+        Returns:
+            A list of all nodes.
+
+        """
+        return [n for n in self.nodes()]
+
+    def get_vnodes(self):
+        """Get all variable nodes of the factor graph.
+
+        Returns:
+            A list of all variable nodes.
+
+        """
+        return [n for (n, d) in self.nodes(data=True)
+                if d['type'] == nodes.NodeType.variable_node]
+
+    def get_fnodes(self):
+        """Get all factor nodes of the factor graph.
+
+        Returns:
+            A list of all factor nodes.
+
+        """
+        return [n for (n, d) in self.nodes(data=True)
+                if d['type'] == nodes.NodeType.factor_node]
+
     def set_edge(self, snode, tnode, init=None):
-        """Add a single edge to the factor graph.
+        """Set a single edge to the factor graph.
 
         A single edge is added to the factor graph.
         It can be initialized with a given random variable.
@@ -90,10 +126,23 @@ class FactorGraph(nx.Graph):
         self.add_edge(snode, tnode,
                       object=edges.Edge(snode, tnode, init))
 
-    def set_edges(self, edges):
-        """Add multiple edges to the factor graph.
+    def get_edge(self, slabel, tlabel):
+        """Get a single edge from the factor graph.
 
-        Multiple edges are added to the factor graph.
+        Args:
+            slabel: Source label for edge
+            tlabel: Target label for edge
+
+        Returns:
+            A single edge.
+
+        """
+        snode = self.get_node(slabel)
+        tnode = self.get_node(tlabel)
+        return self.edges[snode, tnode]['object']
+
+    def set_edges(self, edges):
+        """Set multiple edges to the factor graph.
 
         Args:
             edges: A list of multiple edges
@@ -102,25 +151,14 @@ class FactorGraph(nx.Graph):
         for (snode, tnode) in edges:
             self.set_edge(snode, tnode)
 
-    def get_vnodes(self):
-        """Return variable nodes of the factor graph.
+    def get_edges(self):
+        """Get multiple edges from the factor graph:
 
         Returns:
-            A list of all variable nodes.
+            A list of multiple edges.
 
         """
-        return [n for (n, d) in self.nodes(data=True)
-                if d['type'] == nodes.NodeType.variable_node]
-
-    def get_fnodes(self):
-        """Return factor nodes of the factor graph.
-
-        Returns:
-            A list of all factor nodes.
-
-        """
-        return [n for (n, d) in self.nodes(data=True)
-                if d['type'] == nodes.NodeType.factor_node]
+        return [d['object'] for (_, _, d) in self.edges(data=True)]
 
 
 class ForneyFactorGraph(FactorGraph):
