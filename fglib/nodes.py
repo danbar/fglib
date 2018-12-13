@@ -46,6 +46,10 @@ class Node(ABC):
         """Specify the NodeType."""
 
     @property
+    def label(self):
+        return self.__label
+
+    @property
     def graph(self):
         return self.__graph
 
