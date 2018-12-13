@@ -123,7 +123,7 @@ class FactorGraph(nx.Graph):
                 if d['type'] == nodes.NodeType.factor_node]
 
 
-def ForneyFactorGraph(FactorGraph):
+class ForneyFactorGraph(FactorGraph):
 
     """Class  for Forney-style factor graphs.
 
