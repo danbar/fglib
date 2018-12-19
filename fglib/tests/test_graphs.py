@@ -8,7 +8,27 @@ from .. import graphs, nodes, rv
 
 class TestFactorGraph(unittest.TestCase):
 
-    def test_convert_graph_to_factor_garph(self):
+    def test_get_nodes(self):
+        # Create factor graph
+        fg = graphs.FactorGraph()
+
+        # Create variable nodes
+        x1 = nodes.VNode("x1", rv.Discrete)
+        x2 = nodes.VNode("x2", rv.Discrete)
+
+        # Create factor nodes (with joint distributions)
+        dist_fa = [[0.3, 0.4],
+                   [0.3, 0.0]]
+        fa = nodes.FNode("fa", rv.Discrete(dist_fa, x1, x2))
+
+        fg.set_nodes([x1, fa, x2])
+        fg.set_edges([(x1, fa), (fa, x2)])
+
+        self.assertCountEqual(fg.get_nodes(), [x1, fa, x2])
+        self.assertCountEqual(fg.get_vnodes(), [x1, x2])
+        self.assertCountEqual(fg.get_fnodes(), [fa])
+
+    def test_convert_graph_to_factor_graph(self):
         variable_nodes = ['x1', 'x2', 'x3', 'x4']
         factor_nodes = ['fa', 'fb', 'fc']
 
