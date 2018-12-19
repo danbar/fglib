@@ -11,6 +11,7 @@ Classes:
 """
 
 from abc import ABC, abstractmethod, abstractproperty, abstractclassmethod
+from copy import copy
 
 import numpy as np
 
@@ -72,10 +73,14 @@ class RandomVariable(ABC):
 
     @abstractmethod
     def marginalize(self):
-        """Return marginal of the random variable."""
+        """Marginalize the random variable."""
 
     @abstractmethod
     def maximize(self):
+        """Maximize the random variable."""
+
+    @abstractmethod
+    def max(self):
         """Return maximum of the random variable."""
 
     @abstractmethod
@@ -170,13 +175,18 @@ class Discrete(RandomVariable):
         """
         # Verify dimensions of summand and summand.
         if len(self.dim) < len(other.dim):
-            self._expand(other.dim, other.pmf.shape)
+            c = copy(self)
+            c._expand(other.dim, other.pmf.shape)
+            pmf = c.pmf + other.pmf
+            return Discrete(pmf, *other.dim)  # TODO: Make it more pythonic.
         elif len(self.dim) > len(other.dim):
-            other._expand(self.dim, self.pmf.shape)
-
-        pmf = self.pmf + other.pmf
-
-        return Discrete(pmf, *self.dim)
+            c = copy(other)
+            c._expand(self.dim, self.pmf.shape)
+            pmf = self.pmf + c.pmf
+            return Discrete(pmf, *self.dim)
+        else:
+            pmf = self.pmf + other.pmf
+            return Discrete(pmf, *self.dim)
 
     def __sub__(self, other):
         """Subtract other from self and return the result.
@@ -190,13 +200,18 @@ class Discrete(RandomVariable):
         """
         # Verify dimensions of minuend and subtrahend.
         if len(self.dim) < len(other.dim):
-            self._expand(other.dim, other.pmf.shape)
+            c = copy(self)
+            c._expand(other.dim, other.pmf.shape)
+            pmf = c.pmf - other.pmf
+            return Discrete(pmf, *other.dim)
         elif len(self.dim) > len(other.dim):
-            other._expand(self.dim, self.pmf.shape)
-
-        pmf = self.pmf - other.pmf
-
-        return Discrete(pmf, *self.dim)
+            c = copy(other)
+            c._expand(self.dim, self.pmf.shape)
+            pmf = self.pmf - c.pmf
+            return Discrete(pmf, *self.dim)
+        else:
+            pmf = self.pmf - other.pmf
+            return Discrete(pmf, *self.dim)
 
     def __mul__(self, other):
         """Multiply other with self and return the result.
@@ -210,13 +225,18 @@ class Discrete(RandomVariable):
         """
         # Verify dimensions of multiplicand and multiplier.
         if len(self.dim) < len(other.dim):
-            self._expand(other.dim, other.pmf.shape)
+            c = copy(self)
+            c._expand(other.dim, other.pmf.shape)
+            pmf = c.pmf * other.pmf
+            return Discrete(pmf, *other.dim)
         elif len(self.dim) > len(other.dim):
-            other._expand(self.dim, self.pmf.shape)
-
-        pmf = self.pmf * other.pmf
-
-        return Discrete(pmf, *self.dim)
+            c = copy(other)
+            c._expand(self.dim, self.pmf.shape)
+            pmf = self.pmf * c.pmf
+            return Discrete(pmf, *self.dim)
+        else:
+            pmf = self.pmf * other.pmf
+            return Discrete(pmf, *self.dim)
 
     def __iadd__(self, other):
         """Method for augmented addition.
@@ -292,7 +312,7 @@ class Discrete(RandomVariable):
         pmf = self.pmf / np.abs(np.sum(self.pmf))
         return Discrete(pmf, *self.dim)
 
-    def marginalize(self, *dims, normalize=True):
+    def marginalize(self, *msgs, normalize=True):
         """Return the marginal for given dimensions.
 
         The probability mass function of the discrete random variable
@@ -308,6 +328,7 @@ class Discrete(RandomVariable):
             A new discrete random variable representing the marginal.
 
         """
+        dims = [d for msg in msgs for d in msg.dim]
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.sum(self.pmf, axis)
         if normalize:
@@ -316,7 +337,7 @@ class Discrete(RandomVariable):
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)
 
-    def maximize(self, *dims, normalize=True):
+    def maximize(self, *msgs, normalize=True):
         """Return the maximum for given dimensions.
 
         The probability mass function of the discrete random variable
@@ -332,6 +353,7 @@ class Discrete(RandomVariable):
             A new discrete random variable representing the maximum.
 
         """
+        dims = [d for msg in msgs for d in msg.dim]
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.amax(self.pmf, axis)
         if normalize:
@@ -340,23 +362,24 @@ class Discrete(RandomVariable):
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Discrete(pmf, *new_dims)
 
-    def argmax(self, dim=None):
-        """Return the dimension index of the maximum.
+    def max(self):
+        """Return the maximum.
 
-        Args:
-            dim: An optional discrete random variable along a marginalization
-                should be performed and the maximum is searched over the
-                remaining dimensions. In the case of None, the maximum is
-                search along all dimensions.
+        Returns:
+            The maximum.
+
+        """
+        return np.amax(self.pmf)
+
+    def argmax(self):
+        """Return the dimension index of the maximum.
 
         Returns:
             An integer representing the dimension of the maximum.
 
         """
-        if dim is None:
-            return np.unravel_index(self.pmf.argmax(), self.pmf.shape)
-        m = self.marginalize(dim)
-        return np.argmax(m.pmf)
+        a = np.argmax(self.pmf)
+        return np.unravel_index(a, self.pmf.shape)
 
     def log(self):
         """Natural logarithm of the discrete random variable.
@@ -619,6 +642,9 @@ class Gaussian(RandomVariable):
 
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Gaussian(mean, cov, *new_dims)
+
+    def max(self):
+        pass
 
     def argmax(self, dim=None):
         """Return the dimension index of the maximum.

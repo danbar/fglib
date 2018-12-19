@@ -13,10 +13,10 @@ Functions:
 
 import networkx as nx
 
-from . import nodes, edges
+from . import nodes
 
 
-class FactorGraph(nx.Graph):
+class FactorGraph(nx.DiGraph):
 
     """Class for factor graphs.
 
@@ -41,7 +41,7 @@ class FactorGraph(nx.Graph):
                            \\--//
 
     The class for factor graphs is inherited from the base class
-    for undirected graphs (of the NetworkX library).
+    for directed graphs (of the NetworkX library).
 
     """
 
@@ -56,21 +56,7 @@ class FactorGraph(nx.Graph):
             node: A single node
 
         """
-        node.graph = self  # TODO: Can we get rid of this?
-        self.add_node(node, label=node.label, type=node.type)
-
-    def get_node(self, label):
-        """ Get a single node from the factor graph.
-
-        Args:
-            label: Label of a single node
-
-        Returns:
-            A single node.
-
-        """
-        return [n for (n, d) in self.nodes(data=True)
-                if d['label'] == label]
+        self.add_node(node)
 
     def set_nodes(self, nodes):
         """Set multiple nodes to the factor graph.
@@ -98,8 +84,8 @@ class FactorGraph(nx.Graph):
             A list of all variable nodes.
 
         """
-        return [n for (n, d) in self.nodes(data=True)
-                if d['type'] == nodes.NodeType.variable_node]
+        return [n for n in self.nodes()
+                if n.type == nodes.NodeType.variable_node]
 
     def get_fnodes(self):
         """Get all factor nodes of the factor graph.
@@ -108,8 +94,8 @@ class FactorGraph(nx.Graph):
             A list of all factor nodes.
 
         """
-        return [n for (n, d) in self.nodes(data=True)
-                if d['type'] == nodes.NodeType.factor_node]
+        return [n for n in self.nodes()
+                if n.type == nodes.NodeType.factor_node]
 
     def set_edge(self, snode, tnode, init=None):
         """Set a single edge to the factor graph.
@@ -123,23 +109,8 @@ class FactorGraph(nx.Graph):
             init: Initial message for edge
 
         """
-        self.add_edge(snode, tnode,
-                      object=edges.Edge(snode, tnode, init))
-
-    def get_edge(self, slabel, tlabel):
-        """Get a single edge from the factor graph.
-
-        Args:
-            slabel: Source label for edge
-            tlabel: Target label for edge
-
-        Returns:
-            A single edge.
-
-        """
-        snode = self.get_node(slabel)
-        tnode = self.get_node(tlabel)
-        return self.edges[snode, tnode]['object']
+        self.add_edge(snode, tnode, msg=init)
+        self.add_edge(tnode, snode, msg=init)
 
     def set_edges(self, edges):
         """Set multiple edges to the factor graph.
@@ -151,14 +122,31 @@ class FactorGraph(nx.Graph):
         for (snode, tnode) in edges:
             self.set_edge(snode, tnode)
 
-    def get_edges(self):
+    def get_message(self, snode, tnode):
+        """Get a single edge from the factor graph.
+
+        Args:
+            slabel: Source label for edge
+            tlabel: Target label for edge
+
+        Returns:
+            A single edge.
+
+        """
+        return self.edges[snode, tnode]['msg']
+
+    def get_incoming_messages(self, node, exclude_node=None):
         """Get multiple edges from the factor graph:
 
         Returns:
             A list of multiple edges.
 
         """
-        return [d['object'] for (_, _, d) in self.edges(data=True)]
+        if exclude_node is None:
+            return [d['msg'] for (_, _, d) in self.in_edges(node, data=True)]
+        else:
+            return [d['msg'] for (u, v, d) in self.in_edges(node, data=True)
+                    if exclude_node is not u and exclude_node is not v]
 
 
 class ForneyFactorGraph(FactorGraph):

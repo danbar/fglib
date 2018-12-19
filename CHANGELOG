@@ -1,3 +1,9 @@
+fglib v0.3
+----------
+* Refactor internal structure for factor graphs (using directed graphs)
+* Add new getter and setter methods for factor graphs
+* Several bugfixes and improvements
+
 fglib v0.2
 ----------
 * Improve interface of variable nodes

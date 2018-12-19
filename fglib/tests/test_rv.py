@@ -115,29 +115,28 @@ class TestDiscrete(unittest.TestCase):
     def test_marginalize(self):
         res = np.array([0.4, 0.6])
         res /= np.sum(res)
-        marginalize = self.rv3.marginalize(self.x1)
+        marginalize = self.rv3.marginalize(self.rv1)
         npt.assert_almost_equal(marginalize.pmf, res)
 
         res = np.array([0.3, 0.7])
         res /= np.sum(res)
-        marginalize = self.rv3.marginalize(self.x2)
+        marginalize = self.rv3.marginalize(self.rv2)
         npt.assert_almost_equal(marginalize.pmf, res)
 
     def test_maximize(self):
         res = np.array([0.3, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.maximize(self.x1)
+        amax = self.rv3.maximize(self.rv1)
         npt.assert_almost_equal(amax.pmf, res)
 
         res = np.array([0.2, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.maximize(self.x2)
+        amax = self.rv3.maximize(self.rv2)
         npt.assert_almost_equal(amax.pmf, res)
 
     def test_argmax(self):
         self.assertEqual(self.rv1.argmax(), (0,))
         self.assertEqual(self.rv3.argmax(), (1, 1))
-        self.assertEqual(self.rv3.argmax(self.x1), (1,))
 
     @unittest.skip("Test case is not implemented.")
     def test_log(self):

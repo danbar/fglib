@@ -16,9 +16,6 @@ from abc import ABC, abstractmethod, abstractproperty
 from enum import Enum
 from types import MethodType
 
-import networkx as nx
-import numpy as np
-
 
 class NodeType(Enum):
 
@@ -35,7 +32,6 @@ class Node(ABC):
     def __init__(self, label):
         """Create a node with an associated label."""
         self.__label = str(label)
-        self.__graph = None
 
     def __str__(self):
         """Return string representation."""
@@ -49,50 +45,20 @@ class Node(ABC):
     def label(self):
         return self.__label
 
-    @property
-    def graph(self):
-        return self.__graph
-
-    @graph.setter
-    def graph(self, graph):
-        self.__graph = graph
-
-    def neighbors(self, exclusion=None):
-        """Get all neighbors with a given exclusion.
-
-        Return iterator over all neighboring nodes
-        without the given exclusion node.
-
-        Positional arguments:
-        exclusion -- the exclusion node
-
-        """
-
-        if exclusion is None:
-            return nx.all_neighbors(self.graph, self)
-        else:
-            # Build iterator set
-            iterator = (exclusion,) \
-                if not isinstance(exclusion, list) else exclusion
-
-            # Return neighbors excluding iterator set
-            return (n for n in nx.all_neighbors(self.graph, self)
-                    if n not in iterator)
-
     @abstractmethod
-    def spa(self, tnode):
+    def spa(self, tnode, msgs_in):
         """Return message of the sum-product algorithm."""
 
     @abstractmethod
-    def mpa(self, tnode):
+    def mpa(self, tnode, msgs_in):
         """Return message of the max-product algorithm."""
 
     @abstractmethod
-    def msa(self, tnode):
+    def msa(self, tnode, msgs_in):
         """Return message of the max-sum algorithm."""
 
     @abstractmethod
-    def mf(self, tnode):
+    def mf(self, tnode, msgs_in):
         """Return message of the mean-field algorithm."""
 
 
@@ -123,68 +89,66 @@ class VNode(Node):
     def init(self, init):
         self.__init = init
 
-    def belief(self, normalize=True):
+    def belief(self, msgs_in, normalize=True):
         """Return belief of the variable node.
 
         Args:
             normalize: Boolean flag if belief should be normalized.
 
         """
-        iterator = self.graph.neighbors(self)
-
-        # Pick first node
-        n = next(iterator)
+        # Pick first message
+        it_msgs = iter(msgs_in)
+        belief = next(it_msgs)
 
         # Product over all incoming messages
-        belief = self.graph[n][self]['object'].get_message(n, self)
-        if not self.graph[n][self]['object'].logarithmic:
-            for n in iterator:
-                belief *= self.graph[n][self]['object'].get_message(n, self)
+        if not False:  # TODO: self.graph[n][self]['object'].logarithmic:
+            for msg_in in it_msgs:
+                belief *= msg_in
         else:
-            for n in iterator:
-                belief += self.graph[n][self]['object'].get_message(n, self)
+            for msg_in in it_msgs:
+                belief += msg_in
 
         if normalize:
             belief = belief.normalize()
 
         return belief
 
-    def maximum(self, normalize=True):
+    def max(self, msgs_in, normalize=True):
         """Return the maximum probability of the variable node.
 
         Args:
             normalize: Boolean flag if belief should be normalized.
 
         """
-        b = self.belief(normalize)
-        return np.amax(b.pmf)
+        b = self.belief(msgs_in, normalize)
+        return b.max()
 
-    def argmax(self):
+    def argmax(self, msgs_in):
         """Return the argument for maximum probability of the variable node."""
         # In case of multiple occurrences of the maximum values,
         # the indices corresponding to the first occurrence are returned.
-        b = self.belief()
-        return b.argmax(self)
+        b = self.belief(msgs_in)
+        return b.argmax()
 
-    def spa(self, tnode):
+    def spa(self, tnode, msgs_in):
         """Return message of the sum-product algorithm."""
         if self.observed:
             return self.init
         else:
             # Initial message
-            msg = self.init
+            msg_out = self.init
 
             # Product over incoming messages
-            for n in self.neighbors(tnode):
-                msg *= self.graph[n][self]['object'].get_message(n, self)
+            for msg_in in msgs_in:
+                msg_out *= msg_in
 
-            return msg
+            return msg_out
 
-    def mpa(self, tnode):
+    def mpa(self, tnode, msgs_in):
         """Return message of the max-product algorithm."""
-        return self.spa(tnode)
+        return self.spa(tnode, msgs_in)
 
-    def msa(self, tnode):
+    def msa(self, tnode, msgs_in):
         """Return message of the max-sum algorithm."""
         if self.observed:
             return self.init.log()
@@ -193,12 +157,12 @@ class VNode(Node):
             msg = self.init.log()
 
             # Sum over incoming messages
-            for n in self.neighbors(tnode):
+            for n in msgs_in:
                 msg += self.graph[n][self]['object'].get_message(n, self)
 
             return msg
 
-    def mf(self, tnode):
+    def mf(self, tnode, msgs_in):
         """Return message of the mean-field algorithm."""
         if self.observed:
             return self.init
@@ -262,40 +226,40 @@ class FNode(Node):
     def factor(self, factor):
         self.__factor = factor
 
-    def spa(self, tnode):
+    def spa(self, tnode, msgs_in):
         """Return message of the sum-product algorithm."""
         # Initialize with local factor
-        msg = self.factor
+        msg_out = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(tnode):
-            msg *= self.graph[n][self]['object'].get_message(n, self)
+        for msg_in in msgs_in:
+            msg_out *= msg_in
 
         # Integration/Summation over incoming variables
-        for n in self.neighbors(tnode):
-            msg = msg.marginalize(n, normalize=False)
+        for msg_in in msgs_in:
+            msg_out = msg_out.marginalize(msg_in, normalize=False)
 
-        return msg
+        return msg_out
 
-    def mpa(self, tnode):
+    def mpa(self, tnode, msgs_in):
         """Return message of the max-product algorithm."""
-        self.record[tnode] = {}
+        self.record[tnode] = {}  # TODO: Can we avoid 'tnode'?
 
         # Initialize with local factor
-        msg = self.factor
+        msg_out = self.factor
 
         # Product over incoming messages
-        for n in self.neighbors(tnode):
-            msg *= self.graph[n][self]['object'].get_message(n, self)
+        for msg_in in msgs_in:
+            msg_out *= msg_in
 
         # Maximization over incoming variables
-        for n in self.neighbors(tnode):
-            self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
-            msg = msg.maximize(n, normalize=False)
+        for msg_in in msgs_in:
+            self.record[tnode][msg_in.dim] = msg_out.argmax()  # Back-tracking
+            msg_out = msg_out.maximize(msg_in, normalize=False)
 
-        return msg
+        return msg_out
 
-    def msa(self, tnode):
+    def msa(self, tnode, msgs_in):
         """Return message of the max-sum algorithm."""
         self.record[tnode] = {}
 
@@ -303,17 +267,17 @@ class FNode(Node):
         msg = self.factor.log()
 
         # Sum over incoming messages
-        for n in self.neighbors(tnode):
+        for n in snodes:
             msg += self.graph[n][self]['object'].get_message(n, self)
 
         # Maximization over incoming variables
-        for n in self.neighbors(tnode):
-            self.record[tnode][n] = msg.argmax(n)  # Record for back-tracking
+        for n in snodes:
+            self.record[tnode][n] = msg.argmax(n)  # Back-tracking
             msg = msg.maximize(n, normalize=False)
 
         return msg
 
-    def mf(self, tnode):
+    def mf(self, tnode, msgs_in):
         """Return message of the mean-field algorithm."""
         # Initialize with local factor
         msg = self.factor

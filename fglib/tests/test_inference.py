@@ -47,45 +47,49 @@ class TestInference(unittest.TestCase):
         inference.sum_product(self.fg, query_node=self.x1)
 
         # Test belief of variable node x1
-        belief = self.x1.belief(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x1)
+        belief = self.x1.belief(msgs_in, normalize=False)
         res = np.array([0.183, 0.147])
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x1,))
 
-        belief = self.x1.belief()
+        belief = self.x1.belief(msgs_in)
         res /= np.sum(res)
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x1,))
 
         # Test belief of variable node x2
-        belief = self.x2.belief(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x2)
+        belief = self.x2.belief(msgs_in, normalize=False)
         res = np.array([0.294, 0.036])
-        npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x2,))
+        npt.assert_almost_equal(belief.pmf, res)
 
-        belief = self.x2.belief()
+        belief = self.x2.belief(msgs_in)
         res /= np.sum(res)
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x2,))
 
         # Test belief of variable node x3
-        belief = self.x3.belief(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x3)
+        belief = self.x3.belief(msgs_in, normalize=False)
         res = np.array([0.162, 0.168])
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x3,))
 
-        belief = self.x3.belief()
+        belief = self.x3.belief(msgs_in)
         res /= np.sum(res)
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x3,))
 
         # Test belief of variable node x4
-        belief = self.x4.belief(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x4)
+        belief = self.x4.belief(msgs_in, normalize=False)
         res = np.array([0.162, 0.168])
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x4,))
 
-        belief = self.x4.belief()
+        belief = self.x4.belief(msgs_in)
         res /= np.sum(res)
         npt.assert_almost_equal(belief.pmf, res)
         self.assertEqual(belief.dim, (self.x4,))
@@ -94,38 +98,42 @@ class TestInference(unittest.TestCase):
         inference.max_product(self.fg, query_node=self.x1)
 
         # Test maximum of variable node x1
-        maximum = self.x1.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x1)
+        maximum = self.x1.max(msgs_in, normalize=False)
         res = 0.048
         npt.assert_almost_equal(maximum, res)
 
-        maximum = self.x1.maximum()
+        maximum = self.x1.max(msgs_in)
         res /= np.sum([0.048, 0.048])
         npt.assert_almost_equal(maximum, res)
 
         # Test maximum of variable node x2
-        maximum = self.x2.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x2)
+        maximum = self.x2.max(msgs_in, normalize=False)
         res = 0.048
         npt.assert_almost_equal(maximum, res)
 
-        maximum = self.x2.maximum()
+        maximum = self.x2.max(msgs_in)
         res /= np.sum([0.036, 0.048])
         npt.assert_almost_equal(maximum, res)
 
         # Test maximum of variable node x3
-        maximum = self.x3.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x3)
+        maximum = self.x3.max(msgs_in, normalize=False)
         res = 0.048
         npt.assert_almost_equal(maximum, res)
 
-        maximum = self.x3.maximum()
+        maximum = self.x3.max(msgs_in)
         res /= np.sum([0.048, 0.036])
         npt.assert_almost_equal(maximum, res)
 
         # Test maximum of variable node x4
-        maximum = self.x4.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x4)
+        maximum = self.x4.max(msgs_in, normalize=False)
         res = 0.048
         npt.assert_almost_equal(maximum, res)
 
-        maximum = self.x4.maximum()
+        maximum = self.x4.max(msgs_in)
         res /= np.sum([0.036, 0.048])
         npt.assert_almost_equal(maximum, res)
 
