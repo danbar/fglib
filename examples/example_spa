@@ -72,10 +72,13 @@ print("Belief of variable node x4:")
 print(belief)
 
 print("Belief of variable node x3:")
-print(x3.belief())
+msgs = fg.get_incoming_messages(x3)
+print(x3.belief(msgs))
 
 print("Belief of variable node x2:")
-print(x2.belief(normalize=True))
+msgs = fg.get_incoming_messages(x2)
+print(x2.belief(msgs, normalize=True))
 
 print("Unnormalized belief of variable node x1:")
-print(x1.belief(normalize=False))
+msgs = fg.get_incoming_messages(x1)
+print(x1.belief(msgs, normalize=False))

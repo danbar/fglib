@@ -67,17 +67,20 @@ fg.set_edge(fc, x4)
 
 # Perform max-product algorithm on factor graph
 # and request maximum of variable node x4
-maximum, _ = inference.max_product(fg, x4)
+max, _ = inference.max_product(fg, x4)
 
 # Print maximum of variables
 print("Maximum of variable node x4:")
-print(maximum)
+print(max)
 
 print("Maximum of variable node x3:")
-print(x3.maximum())
+msgs = fg.get_incoming_messages(x3)
+print(x3.max(msgs))
 
 print("Maximum of variable node x2:")
-print(x2.maximum(normalize=True))
+msgs = fg.get_incoming_messages(x2)
+print(x2.max(msgs, normalize=True))
 
 print("Unnormalized Maximum of variable node x1:")
-print(x1.maximum(normalize=False))
+msgs = fg.get_incoming_messages(x1)
+print(x1.max(msgs, normalize=False))
