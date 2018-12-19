@@ -89,7 +89,7 @@ class VNode(Node):
     def init(self, init):
         self.__init = init
 
-    def belief(self, msgs_in, normalize=True):
+    def belief(self, msgs_in, normalize=True, logarithmic=False):
         """Return belief of the variable node.
 
         Args:
@@ -101,7 +101,7 @@ class VNode(Node):
         belief = next(it_msgs)
 
         # Product over all incoming messages
-        if not False:  # TODO: self.graph[n][self]['object'].logarithmic:
+        if not logarithmic:
             for msg_in in it_msgs:
                 belief *= msg_in
         else:
@@ -113,14 +113,14 @@ class VNode(Node):
 
         return belief
 
-    def max(self, msgs_in, normalize=True):
+    def max(self, msgs_in, normalize=True, logarithmic=False):
         """Return the maximum probability of the variable node.
 
         Args:
             normalize: Boolean flag if belief should be normalized.
 
         """
-        b = self.belief(msgs_in, normalize)
+        b = self.belief(msgs_in, normalize, logarithmic)
         return b.max()
 
     def argmax(self, msgs_in):
@@ -154,13 +154,13 @@ class VNode(Node):
             return self.init.log()
         else:
             # Initial (logarithmized) message
-            msg = self.init.log()
+            msg_out = self.init.log()
 
             # Sum over incoming messages
-            for n in msgs_in:
-                msg += self.graph[n][self]['object'].get_message(n, self)
+            for msg_in in msgs_in:
+                msg_out += msg_in
 
-            return msg
+            return msg_out
 
     def mf(self, tnode, msgs_in):
         """Return message of the mean-field algorithm."""
@@ -264,18 +264,18 @@ class FNode(Node):
         self.record[tnode] = {}
 
         # Initialize with (logarithmized) local factor
-        msg = self.factor.log()
+        msg_out = self.factor.log()
 
         # Sum over incoming messages
-        for n in snodes:
-            msg += self.graph[n][self]['object'].get_message(n, self)
+        for msg_in in msgs_in:
+            msg_out += msg_in
 
         # Maximization over incoming variables
-        for n in snodes:
-            self.record[tnode][n] = msg.argmax(n)  # Back-tracking
-            msg = msg.maximize(n, normalize=False)
+        for msg_in in msgs_in:
+            self.record[tnode][msg_in.dim] = msg_out.argmax()  # Back-tracking
+            msg_out = msg_out.maximize(msg_in, normalize=False)
 
-        return msg
+        return msg_out
 
     def mf(self, tnode, msgs_in):
         """Return message of the mean-field algorithm."""

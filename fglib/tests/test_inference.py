@@ -141,38 +141,42 @@ class TestInference(unittest.TestCase):
         inference.max_sum(self.fg, query_node=self.x1)
 
         # Test maximum of variable node x1
-        maximum = self.x1.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x1)
+        maximum = self.x1.max(msgs_in, normalize=False, logarithmic=True)
         res = -3.036
         npt.assert_almost_equal(maximum, res, decimal=3)
 
-        maximum = self.x1.maximum()
+        maximum = self.x1.max(msgs_in, logarithmic=True)
         res /= np.abs(np.sum([-3.036, -3.036]))
         npt.assert_almost_equal(maximum, res, decimal=3)
 
         # Test maximum of variable node x2
-        maximum = self.x2.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x2)
+        maximum = self.x2.max(msgs_in, normalize=False, logarithmic=True)
         res = -3.036
         npt.assert_almost_equal(maximum, res, decimal=3)
 
-        maximum = self.x2.maximum()
+        maximum = self.x2.max(msgs_in, logarithmic=True)
         res /= np.abs(np.sum([-3.036, -3.324]))
         npt.assert_almost_equal(maximum, res, decimal=3)
 
         # Test maximum of variable node x3
-        maximum = self.x3.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x3)
+        maximum = self.x3.max(msgs_in, normalize=False, logarithmic=True)
         res = -3.036
         npt.assert_almost_equal(maximum, res, decimal=3)
 
-        maximum = self.x3.maximum()
+        maximum = self.x3.max(msgs_in, logarithmic=True)
         res /= np.abs(np.sum([-3.324, -3.036]))
         npt.assert_almost_equal(maximum, res, decimal=3)
 
         # Test maximum of variable node x4
-        maximum = self.x4.maximum(normalize=False)
+        msgs_in = self.fg.get_incoming_messages(self.x4)
+        maximum = self.x4.max(msgs_in, normalize=False, logarithmic=True)
         res = -3.036
         npt.assert_almost_equal(maximum, res, decimal=3)
 
-        maximum = self.x4.maximum()
+        maximum = self.x4.max(msgs_in, logarithmic=True)
         res /= np.abs(np.sum([-3.324, -3.036]))
         npt.assert_almost_equal(maximum, res, decimal=3)
 

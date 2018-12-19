@@ -135,16 +135,19 @@ def max_sum(graph, query_node=None):
 
     # Messages in forward phase
     for (v, u) in forward_path:  # Edge direction: u -> v
-        msg = u.msa(v)
-        graph[u][v]['object'].set_message(u, v, msg, logarithmic=True)
+        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
+        msg_out = u.msa(v, msgs_in)
+        graph.edges[u, v]['msg'] = msg_out
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
-        msg = u.msa(v)
-        graph[u][v]['object'].set_message(u, v, msg, logarithmic=True)
+        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
+        msg_out = u.msa(v, msgs_in)
+        graph.edges[u, v]['msg'] = msg_out
 
     # Maximum argument for query node
-    track[query_node] = query_node.argmax()
+    msgs_in = graph.get_incoming_messages(query_node)
+    track[query_node] = query_node.argmax(msgs_in)
 
     # Back-tracking
     for (u, v) in backward_path:  # Edge direction: u -> v
@@ -153,7 +156,8 @@ def max_sum(graph, query_node=None):
                 track[k] = v.record[u][k]
 
     # Return maximum probability for query node and setting of variable
-    return query_node.max(), track
+    msgs_in = graph.get_incoming_messages(query_node)
+    return query_node.max(msgs_in, logarithmic=True), track
 
 
 def loopy_belief_propagation(model, iterations, query_node=(), order=None):
