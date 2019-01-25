@@ -126,14 +126,15 @@ class FactorGraph(nx.DiGraph):
         """Get a single edge from the factor graph.
 
         Args:
-            slabel: Source label for edge
-            tlabel: Target label for edge
+            slabel: Source node for edge
+            tlabel: Target node for edge
 
         Returns:
             A single edge.
 
         """
-        return self.edges[snode, tnode]['msg']
+        message = self.edges[snode, tnode]['msg']
+        return message.normalize()
 
     def get_incoming_messages(self, node, exclude_node=None):
         """Get multiple edges from the factor graph:
