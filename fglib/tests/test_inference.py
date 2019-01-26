@@ -44,7 +44,7 @@ class TestInference(unittest.TestCase):
         self.fg.set_edge(self.fc, self.x4)
 
     def test_spa(self):
-        inference.sum_product(self.fg, query_node=self.x1)
+        inference.sum_product(self.fg)
 
         # Test belief of variable node x1
         msgs_in = self.fg.get_incoming_messages(self.x1)
@@ -95,7 +95,7 @@ class TestInference(unittest.TestCase):
         self.assertEqual(belief.dim, (self.x4,))
 
     def test_mpa(self):
-        inference.max_product(self.fg, query_node=self.x1)
+        inference.max_product(self.fg)
 
         # Test maximum of variable node x1
         msgs_in = self.fg.get_incoming_messages(self.x1)
@@ -138,7 +138,7 @@ class TestInference(unittest.TestCase):
         npt.assert_almost_equal(maximum, res)
 
     def test_msa(self):
-        inference.max_sum(self.fg, query_node=self.x1)
+        inference.max_sum(self.fg)
 
         # Test maximum of variable node x1
         msgs_in = self.fg.get_incoming_messages(self.x1)
