@@ -19,145 +19,128 @@ import networkx as nx
 from . import nodes
 
 
-def belief_propagation(graph, query_node=None):
-    """Belief propagation.
+def _message_passing(graph, query_node, algorithm):
+    """Message passing.
 
-    Perform exact inference on tree structured graphs.
-    Return the belief of all query_nodes.
+    ...
 
     """
 
-    if query_node is None:  # pick random node
-        query_node = choice(graph.get_vnodes())
-
     # Depth First Search to determine edges
+    # and convert tuple to a (reversed) list
     dfs = nx.dfs_edges(graph, query_node)
 
-    # Convert tuple to reversed list
     backward_path = list(dfs)
     forward_path = reversed(backward_path)
 
     # Messages in forward phase
     for (v, u) in forward_path:  # Edge direction: u -> v
         msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.spa(v, msgs_in)
+        msg_out = getattr(u, algorithm)(v, msgs_in)
         graph.edges[u, v]['msg'] = msg_out
 
     # Messages in backward phase
     for (u, v) in backward_path:  # Edge direction: u -> v
         msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.spa(v, msgs_in)
+        msg_out = getattr(u, algorithm)(v, msgs_in)
         graph.edges[u, v]['msg'] = msg_out
 
-    # Return marginal distribution
+    # Return belief
     msgs_in = graph.get_incoming_messages(query_node)
     return query_node.belief(msgs_in)
+
+
+def _back_tracking(graph, query_node):
+    """Back tracking.
+
+    ...
+
+    """
+
+    # Depth First Search to determine edges
+    # and convert tuple to a list
+    dfs = nx.dfs_edges(graph, query_node)
+    backward_path = list(dfs)
+
+    # Back-tracking in backward phase
+    track = {}
+
+    msgs_in = graph.get_incoming_messages(query_node)
+    track[query_node] = query_node.argmax(msgs_in)
+
+    for (u, v) in backward_path:  # Edge direction: u -> v
+        if v.type == nodes.NodeType.factor_node:
+            for k in v.record[u].keys():
+                track[k] = v.record[u][k][track[u]]
+
+    return track
+
+
+def belief_propagation(graph, query_node=None):
+    """Belief propagation.
+
+    Compute marginal distribution on graphs that are tree structured.
+
+    """
+
+    # Belief Propagation is equivalent to Sum-product algorithm.
+    return sum_product(graph, query_node)
 
 
 def sum_product(graph, query_node=None):
     """Sum-product algorithm.
 
     Compute marginal distribution on graphs that are tree structured.
-    Return the belief of all query_nodes.
 
     """
 
-    # Sum-Product algorithm is equivalent to Belief Propagation
-    return belief_propagation(graph, query_node)
+    if query_node is None:  # pick random node
+        query_node = choice(graph.get_vnodes())
+
+    # Return marginal probability for query node
+    return _message_passing(graph, query_node, 'spa')
 
 
 def max_product(graph, query_node=None):
     """Max-product algorithm.
 
-    Compute setting of variables with maximum probability on graphs
-    that are tree structured.
-    Return the setting of all query_nodes.
+    Compute maximum probability and setting of variables with maximum
+    probability on graphs that are tree structured.
 
     """
-    track = {}  # Setting of variables
 
     if query_node is None:  # pick random node
         query_node = choice(graph.get_vnodes())
 
-    # Depth First Search to determine edges
-    dfs = nx.dfs_edges(graph, query_node)
-
-    # Convert tuple to reversed list
-    backward_path = list(dfs)
-    forward_path = reversed(backward_path)
-
-    # Messages in forward phase
-    for (v, u) in forward_path:  # Edge direction: u -> v
-        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.mpa(v, msgs_in)
-        graph.edges[u, v]['msg'] = msg_out
-
-    # Messages in backward phase
-    for (u, v) in backward_path:  # Edge direction: u -> v
-        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.mpa(v, msgs_in)
-        graph.edges[u, v]['msg'] = msg_out
-
-    # Maximum argument for query node
-    msgs_in = graph.get_incoming_messages(query_node)
-    track[query_node] = query_node.argmax(msgs_in)
+    # Message passing
+    max_prob = _message_passing(graph, query_node, 'mpa')
 
     # Back-tracking
-    for (u, v) in backward_path:  # Edge direction: u -> v
-        if v.type == nodes.NodeType.factor_node:
-            for k in v.record[u].keys():  # Iterate over outgoing edges
-                track[k] = v.record[u][k]
+    arg_max_prob = _back_tracking(graph, query_node)
 
-    # Return maximum probability for query node and setting of variable
-    msgs_in = graph.get_incoming_messages(query_node)
-    return query_node.max(msgs_in), track
+    # Return maximum probability for query node and setting of variables
+    return max_prob, arg_max_prob
 
 
 def max_sum(graph, query_node=None):
     """Max-sum algorithm.
 
-    Compute setting of variable for maximum probability on graphs
-    that are tree structured.
-    Return the setting of all query_nodes.
+    Compute maximum probability and setting of variables with maximum
+    probability on graphs that are tree structured.
 
     """
-    track = {}  # Setting of variables
 
     if query_node is None:  # pick random node
         query_node = choice(graph.get_vnodes())
 
-    # Depth First Search to determine edges
-    dfs = nx.dfs_edges(graph, query_node)
-
-    # Convert tuple to reversed list
-    backward_path = list(dfs)
-    forward_path = reversed(backward_path)
-
-    # Messages in forward phase
-    for (v, u) in forward_path:  # Edge direction: u -> v
-        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.msa(v, msgs_in)
-        graph.edges[u, v]['msg'] = msg_out
-
-    # Messages in backward phase
-    for (u, v) in backward_path:  # Edge direction: u -> v
-        msgs_in = graph.get_incoming_messages(u, exclude_node=v)
-        msg_out = u.msa(v, msgs_in)
-        graph.edges[u, v]['msg'] = msg_out
-
-    # Maximum argument for query node
-    msgs_in = graph.get_incoming_messages(query_node)
-    track[query_node] = query_node.argmax(msgs_in)
+    # Message passing
+    max_prob = _message_passing(graph, query_node, 'msa')
 
     # Back-tracking
-    for (u, v) in backward_path:  # Edge direction: u -> v
-        if v.type == nodes.NodeType.factor_node:
-            for k in v.record[u].keys():  # Iterate over outgoing edges
-                track[k] = v.record[u][k]
+    arg_max_prob = _back_tracking(graph, query_node)
 
     # Return maximum probability for query node and setting of variable
-    msgs_in = graph.get_incoming_messages(query_node)
-    return query_node.max(msgs_in, logarithmic=True), track
+    return max_prob, arg_max_prob
 
 
 def loopy_belief_propagation(model, iterations, query_node=(), order=None):
