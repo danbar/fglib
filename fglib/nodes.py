@@ -254,8 +254,8 @@ class FNode(Node):
 
         # Maximization over incoming variables
         for msg_in in msgs_in:
-            self.record[tnode][msg_in.dim] = msg_out.argmax()  # Back-tracking
-            msg_out = msg_out.maximize(msg_in, normalize=False)
+            msg_out, arg_max = msg_out.maximize(msg_in, normalize=False)
+            self.record[tnode][msg_in.dim[0]] = arg_max  # Back-tracking
 
         return msg_out
 
@@ -272,8 +272,8 @@ class FNode(Node):
 
         # Maximization over incoming variables
         for msg_in in msgs_in:
-            self.record[tnode][msg_in.dim] = msg_out.argmax()  # Back-tracking
-            msg_out = msg_out.maximize(msg_in, normalize=False)
+            msg_out, arg_max = msg_out.maximize(msg_in, normalize=False)
+            self.record[tnode][msg_in.dim[0]] = arg_max  # Back-tracking
 
         return msg_out
 

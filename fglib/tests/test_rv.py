@@ -126,17 +126,17 @@ class TestDiscrete(unittest.TestCase):
     def test_maximize(self):
         res = np.array([0.3, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.maximize(self.rv1)
+        amax, _ = self.rv3.maximize(self.rv1)
         npt.assert_almost_equal(amax.pmf, res)
 
         res = np.array([0.2, 0.4])
         res /= np.sum(res)
-        amax = self.rv3.maximize(self.rv2)
+        amax, _ = self.rv3.maximize(self.rv2)
         npt.assert_almost_equal(amax.pmf, res)
 
     def test_argmax(self):
-        self.assertEqual(self.rv1.argmax(), (0,))
-        self.assertEqual(self.rv3.argmax(), (1, 1))
+        self.assertEqual(self.rv1.argmax(), 0)
+        self.assertEqual(self.rv3.argmax(), 3)
 
     @unittest.skip("Test case is not implemented.")
     def test_log(self):

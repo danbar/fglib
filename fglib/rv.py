@@ -356,13 +356,14 @@ class Discrete(RandomVariable):
         dims = [d for msg in msgs for d in msg.dim]
         axis = tuple(idx for idx, d in enumerate(self.dim) if d in dims)
         pmf = np.amax(self.pmf, axis)
+        arg_max = np.argmax(self.pmf, axis[0])
         if normalize:
             pmf /= np.sum(pmf)
 
         new_dims = tuple(d for d in self.dim if d not in dims)
-        return Discrete(pmf, *new_dims)
+        return Discrete(pmf, *new_dims), arg_max
 
-    def max(self):
+    def max(self, dim=None):
         """Return the maximum.
 
         Returns:
@@ -371,15 +372,14 @@ class Discrete(RandomVariable):
         """
         return np.amax(self.pmf)
 
-    def argmax(self):
+    def argmax(self, dim=None):
         """Return the dimension index of the maximum.
 
         Returns:
             An integer representing the dimension of the maximum.
 
         """
-        a = np.argmax(self.pmf)
-        return np.unravel_index(a, self.pmf.shape)
+        return np.argmax(self.pmf)
 
     def log(self):
         """Natural logarithm of the discrete random variable.
@@ -643,7 +643,7 @@ class Gaussian(RandomVariable):
         new_dims = tuple(d for d in self.dim if d not in dims)
         return Gaussian(mean, cov, *new_dims)
 
-    def max(self):
+    def max(self, dim=None):
         pass
 
     def argmax(self, dim=None):
